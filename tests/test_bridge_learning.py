@@ -131,7 +131,7 @@ class BridgeLearningTests(unittest.TestCase):
             self.assertEqual(fig.layout.meta["display_count"], capacity)
             self.assertEqual(fig.layout.meta["requested_count"], count)
             self.assertTrue(fig.layout.meta["frozen"])
-            self.assertIn("형상·부재력 유지", fig.layout.annotations[-2].text)
+            self.assertIn("상태 유지", fig.layout.annotations[-2].text)
         # 하중을 다시 줄이면 해당 하중의 계산된 변형으로 돌아갑니다.
         fig = self.calc["experiment_figure"](sweep, 0, 10, 1)
         self.assertFalse(fig.layout.meta["frozen"])
@@ -141,7 +141,7 @@ class BridgeLearningTests(unittest.TestCase):
         self.assertEqual(weak["capacity"], -1)
         fig = self.calc["experiment_figure"](weak, 20, 10, 1)
         self.assertEqual(fig.layout.meta["display_count"], 0)
-        self.assertIn("참고 형상 유지", fig.layout.annotations[-2].text)
+        self.assertIn("참고 모습 유지", fig.layout.annotations[-2].text)
         self.assertNotEqual(json.loads(fig.to_json())["data"],
                             json.loads(self.calc["experiment_figure"](weak, 20, 0, 1).to_json())["data"])
 
@@ -289,7 +289,7 @@ class BridgeLearningTests(unittest.TestCase):
         self.app.toggle(key="add_diagonals").set_value(False)
         self.rerun()
         self.assertEqual(self.app.metric[0].value, "계산 불가")
-        self.assertTrue(any("형태 불안정" in w.value for w in self.app.warning))
+        self.assertTrue(any("연결 상태" in w.value for w in self.app.warning))
         self.app.toggle(key="add_diagonals").set_value(True)
         self.rerun()
         self.assertNotEqual(self.app.metric[0].value, "계산 불가")
@@ -301,7 +301,7 @@ class BridgeLearningTests(unittest.TestCase):
             self.app.selectbox(key="selected_bridge").set_value(kind)
             self.rerun()
             self.assertEqual(self.app.metric[0].value, "0.0000 mm")
-            self.assertTrue(any("작용하는 힘이 거의 없어요" in m.value for m in self.app.markdown))
+            self.assertTrue(any("작용하는 힘이 거의 없습니다" in m.value for m in self.app.markdown))
             sweep = self.calc["solve_sweep"](kind, self.config())
             first_bad = next((i for i, r in enumerate(sweep["results"])
                               if not r["stable"] or r["utilization"] > 1+1e-9), None)
@@ -310,6 +310,8 @@ class BridgeLearningTests(unittest.TestCase):
             self.assertTrue(any(f"**{expected}**" in m.value for m in self.app.markdown))
 
     def test_comparison_modes_and_material_change(self):
+        self.app.radio(key="comparison_mode").set_value("두 교량 비교")
+        self.rerun()
         self.app.selectbox(key="compare_left").set_value("아치교")
         self.rerun()
         self.assertNotEqual(self.app.selectbox(key="compare_left").value,
@@ -317,10 +319,56 @@ class BridgeLearningTests(unittest.TestCase):
         self.app.radio(key="comparison_mode").set_value("5종 전체 비교")
         self.app.selectbox(key="material").set_value("단단한 목재형 · 예시")
         self.rerun()
+        self.assertFalse(any("capacity_bridge_overview" in p.proto.id for p in self.app.get("plotly_chart")))
+        self.app.session_state["advanced_comparison"] = True
+        self.rerun()
         self.assertTrue(any("capacity_bridge_overview" in p.proto.id
                             for p in self.app.get("plotly_chart")))
         self.assertEqual(len([s for s in self.app.main.slider if s.key == "load"]), 1)
         self.assertAlmostEqual(self.config()["E"], 10e9)
+
+    def test_reference_mode_and_return_to_basic_limit(self):
+        sweep = self.calc["solve_sweep"]("단순교", self.config())
+        capacity = sweep["capacity"]
+        curves = self.calc["load_curve"]({"단순교": sweep}, ["단순교"], 0)
+        self.assertTrue(all(y is None for trace in curves.data for x, y in zip(trace.x, trace.y) if x > capacity))
+        reference = self.calc["load_curve"]({"단순교": sweep}, ["단순교"], 0, include_reference=True)
+        self.assertTrue(any(y is not None for trace in reference.data for x, y in zip(trace.x, trace.y) if x > capacity))
+        self.app.toggle(key="allow_over_limit").set_value(True)
+        self.rerun()
+        self.assertEqual(self.load_control().max, 20)
+        self.load_control().set_value(capacity + 1)
+        self.rerun()
+        fig = json.loads(next(p for p in self.app.get("plotly_chart") if "selected_" in p.proto.id).proto.spec)
+        self.assertTrue(fig["layout"]["meta"]["frozen"])
+        self.assertEqual(fig["layout"]["meta"]["display_count"], capacity)
+        self.assertTrue(any("선형 참고값" in w.value for w in self.app.warning))
+        self.assertEqual(self.app.metric[0].value, f"{sweep['results'][capacity+1]['deflection_mm']:.4f} mm")
+        self.app.toggle(key="allow_over_limit").set_value(False)
+        self.rerun()
+        self.assertEqual(self.load_control().max, capacity)
+        self.assertEqual(self.load_control().value, capacity)
+
+    def test_learning_flow_without_discussion_inputs(self):
+        self.assertEqual([t.label for t in self.app.tabs], ["실험실 안내", "교량 탐구", "교량 비교"])
+        headings = [h.value for h in self.app.subheader]
+        self.assertLess(headings.index("① 교량 구조 알아보기"), headings.index("② 하중 실험하기"))
+        self.assertEqual(self.app.radio(key="comparison_mode").value, "5종 전체 비교")
+        text = "\n".join(m.value for m in [*self.app.markdown, *self.app.caption, *self.app.info])
+        self.assertNotIn("건설비", text)
+        self.assertNotIn("설계자가", text)
+        self.assertNotIn("가장 여유가 작은", text)
+        for removed in ("Q1.", "Q2.", "토의", "두 질문"):
+            self.assertNotIn(removed, text)
+        self.assertIn("교량 구조를 배우고 실험·실습을 대신할 수 있는 디지털 학습 자료입니다.", text)
+        self.assertIn("③ 교량 비교하기", [h.value for h in self.app.header])
+        self.assertTrue(any("「다양한 교량의 구조」 → 「교량 만들기 실습」" in c.value
+                            for c in self.app.caption))
+        self.assertEqual(len(self.app.text_area), 0)
+        self.app.selectbox(key="selected_bridge").set_value("현수교")
+        self.rerun()
+        self.assertEqual(len(self.app.text_area), 0)
+        self.assertTrue(all(not e.proto.expanded for e in self.app.sidebar.expander))
 
 
 if __name__ == "__main__":
