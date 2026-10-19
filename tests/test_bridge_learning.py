@@ -48,25 +48,104 @@ class BridgeLearningTests(unittest.TestCase):
     def load_control(self):
         return next(w for w in [*self.app.slider, *self.app.number_input] if w.key == "load")
 
+    def test_midspan_point_load_and_force_equilibrium(self):
+        np = self.calc["np"]
+        cfg = dict(self.config(), self_weight=False)
+        gravity = self.calc["GRAVITY"]
+        for kind in self.calc["BRIDGE_NAMES"]:
+            for panels in ([1, 2, 5, 11] if kind == "트러스교" else [cfg["panels"]]):
+                with self.subTest(kind=kind, panels=panels):
+                    config = dict(cfg, panels=panels)
+                    sweep = self.calc["solve_sweep"](kind, config)
+                    model = sweep["model"]
+                    _, force, _ = self.calc["assemble"](model, config)
+                    node = model["load_node"]
+                    self.assertAlmostEqual(model["nodes"][node, 0], config["span"]/2)
+                    self.assertEqual(np.flatnonzero(force[:, 1]).tolist(), [3*node+1])
+                    self.assertAlmostEqual(force[3*node+1, 1], -config["weight_mass"]*gravity)
+                    if kind == "트러스교":
+                        for member in model["members"]:
+                            if member["role"] == "바닥 보":
+                                self.assertAlmostEqual(member["le"], config["span"]/panels)
+                        self.assertAlmostEqual(model["skeleton_mass"],
+                                               2*config["member_width"]*config["member_depth"]*config["span"]*config["density"])
+                    for count in (1, 3):
+                        result = sweep["results"][count]
+                        self.assertTrue(result["stable"])
+                        total = count*config["weight_mass"]*gravity
+                        self.assertAlmostEqual(sum(result["reactions"][1::3]), total, places=7)
+                        moment = (model["nodes"][:, 0] @ result["reactions"][1::3]
+                                  - model["nodes"][:, 1] @ result["reactions"][::3]
+                                  + sum(result["reactions"][2::3]))
+                        self.assertAlmostEqual(moment, total*config["span"]/2, places=7)
+
+    def test_simple_beam_matches_midspan_point_load_solution(self):
+        # MIT Beam Displacements: 중앙 처짐 PL³/(48EI), 최대 휨 모멘트 PL/4.
+        # 자중이 있을 때 기존 균등하중 해를 더해 전체 처짐 곡선까지 확인합니다.
+        np = self.calc["np"]
+        for self_weight in (False, True):
+            cfg = dict(self.config(), self_weight=self_weight)
+            sweep = self.calc["solve_sweep"]("단순교", cfg)
+            model = sweep["model"]
+            length = model["span"]
+            rigidity = model["members"][0]["E"]*model["members"][0]["I"]
+            q = model["mass"]*self.calc["GRAVITY"]/length if self_weight else 0.
+            for count in (1, 2, 7):
+                with self.subTest(self_weight=self_weight, count=count):
+                    result = sweep["results"][count]
+                    load = count*cfg["weight_mass"]*self.calc["GRAVITY"]
+                    expected_max = load*length**3/(48*rigidity) + 5*q*length**4/(384*rigidity)
+                    self.assertAlmostEqual(result["deflection_mm"], expected_max*1000, places=7)
+                    self.assertAlmostEqual(max(result["moments"]), load*length/4 + q*length**2/8, places=8)
+                    expected = []
+                    for x, _, _ in result["deck_samples"]:
+                        distance = min(x, length-x)
+                        point = load*distance*(3*length**2-4*distance**2)/(48*rigidity)
+                        dead = q*x*(length**3-2*length*x**2+x**3)/(24*rigidity)
+                        expected.append(-point-dead)
+                    np.testing.assert_allclose([p[2] for p in result["deck_samples"]], expected, rtol=1e-7, atol=1e-12)
+
+    def test_weights_stack_at_the_central_load_position(self):
+        for kind in self.calc["BRIDGE_NAMES"]:
+            sweep = self.calc["solve_sweep"](kind, self.config())
+            for count in (0, 1, 3, 11, 20):
+                with self.subTest(kind=kind, count=count):
+                    fig = self.calc["experiment_figure"](sweep, count, 0, 1)
+                    bodies = [s for s in fig.layout.shapes if s.name == "추 몸체"]
+                    rings = [s for s in fig.layout.shapes if s.name == "추 고리"]
+                    self.assertEqual(len(bodies), count)
+                    self.assertEqual(len(rings), count)
+                    self.assertAlmostEqual(fig.layout.meta["load_x"], 6.)
+                    for index, ring in enumerate(rings):
+                        self.assertAlmostEqual((ring.x0+ring.x1)/2, 6.)
+                        if index:
+                            self.assertAlmostEqual(ring.y0-rings[index-1].y0, self.calc["WEIGHT_STACK_STEP"])
+                    arrows = [a for a in fig.layout.annotations if a.arrowcolor == self.calc["LOAD_COLOR"]]
+                    self.assertEqual(len(arrows), int(count > 0))
+                    if count:
+                        self.assertEqual(arrows[0].x, arrows[0].ax)
+                        self.assertGreater(arrows[0].ay, arrows[0].y)
+                        self.assertGreater(fig.layout.yaxis.range[1], fig.layout.meta["load_top"])
+
     def test_five_bridges_and_single_main_load_control(self):
         self.assertEqual(len([s for s in self.app.main.slider if s.key == "load"]), 1)
         self.assertNotIn("load", [s.key for s in self.app.sidebar.slider])
         self.assertFalse(self.app.sidebar.expander[0].proto.expanded)
-        self.app.slider(key="load").set_value(3)
+        self.app.slider(key="load").set_value(2)
         for kind in self.calc["BRIDGE_NAMES"]:
             with self.subTest(kind=kind):
                 self.app.selectbox(key="selected_bridge").set_value(kind)
                 self.rerun()
-                self.assertEqual(self.app.slider(key="load").value, 3)
+                self.assertEqual(self.app.slider(key="load").value, 2)
                 sweep = self.calc["solve_sweep"](kind, self.config())
                 self.assertEqual(self.app.metric[0].value,
-                                 f"{sweep['results'][3]['deflection_mm']:.4f} mm")
+                                 f"{sweep['results'][2]['deflection_mm']:.4f} mm")
                 self.assertTrue(any(f"selected_{kind}" in p.proto.id
                                     for p in self.app.get("plotly_chart")))
 
     def test_load_changes_use_actual_values_in_both_directions(self):
         sweep = self.calc["solve_sweep"]("단순교", self.config())
-        for before, after in [(0, 3), (3, 1), (1, 3), (3, 0)]:
+        for before, after in [(0, 2), (2, 1), (1, 2), (2, 0)]:
             self.app.slider(key="load").set_value(after)
             self.rerun()
             messages = self.change_messages()
@@ -118,6 +197,24 @@ class BridgeLearningTests(unittest.TestCase):
         unstable = self.calc["solve_sweep"]("트러스교", config, braced=False)
         fig = self.calc["experiment_figure"](unstable, 3, 10, 1)
         self.assertFalse(any((a.name or "").startswith("member_") for a in fig.layout.annotations))
+        for panels in (1, 5, 11):
+            sweep = self.calc["solve_sweep"]("트러스교", dict(config, panels=panels), braced=False)
+            model = sweep["model"]
+            fig = self.calc["structure_figure"](sweep, 0, 10)
+            examples = [t for t in fig.data if (t.meta or {}).get("illustration") == "unbraced_shear_example"]
+            self.assertTrue(examples)
+            self.assertIn("실제 변형량을 계산한 결과가 아닙니다", fig.layout.annotations[-2].text)
+            for trace in examples:
+                member = model["members"][trace.meta["member_index"]]
+                points = self.calc["np"].array([trace.x, trace.y]).T
+                self.assertEqual(trace.line.dash, "dash")
+                self.assertAlmostEqual(self.calc["np"].linalg.norm(points[1] - points[0]),
+                                       member["length"] * 12 / model["span"])
+                for index, node in enumerate((member["i"], member["j"])):
+                    if 3 * node + 1 in model["fixed"]:
+                        self.calc["np"].testing.assert_allclose(points[index], model["nodes"][node] * 12 / model["span"])
+        reinforced = self.calc["structure_figure"](self.calc["solve_sweep"]("트러스교", config), 0, 10)
+        self.assertFalse(any((t.meta or {}).get("illustration") == "unbraced_shear_example" for t in reinforced.data))
 
     def test_exceeded_limit_preserves_last_valid_deformation(self):
         sweep = self.calc["solve_sweep"]("단순교", self.config())
@@ -165,7 +262,7 @@ class BridgeLearningTests(unittest.TestCase):
         self.assertEqual(self.app.metric[0].value, metric)
         self.assertEqual(self.config(), config)
         self.assertEqual(self.change_messages(), [])
-        self.app.slider(key="load").set_value(3)
+        self.app.slider(key="load").set_value(2)
         self.app.selectbox(key="selected_bridge").set_value("현수교")
         self.rerun()
         self.assertEqual(self.app.session_state["bridge_zoom_percent"], 125)
@@ -178,20 +275,20 @@ class BridgeLearningTests(unittest.TestCase):
         self.app.button(key="bridge_zoom_reset").click()
         self.rerun()
         self.assertEqual(self.app.session_state["bridge_zoom_percent"], 100)
-        self.assertEqual(self.app.slider(key="load").value, 3)
+        self.assertEqual(self.app.slider(key="load").value, 2)
         for percent, button in [(250, "bridge_zoom_in"), (50, "bridge_zoom_out")]:
             self.app.session_state["bridge_zoom_percent"] = percent
             self.rerun()
             self.assertTrue(self.app.button(key=button).disabled)
 
     def test_changed_settings_reset_comparison_and_preserve_count(self):
-        self.app.slider(key="load").set_value(3)
+        self.app.slider(key="load").set_value(2)
         self.rerun()
         self.app.select_slider(key="weight_mass_g").set_value(100)
         self.rerun()
         self.assertEqual(self.change_messages(), [])
         limit = max(0, self.calc["solve_sweep"]("단순교", self.config())["capacity"])
-        count = min(3, limit)
+        count = min(2, limit)
         self.assertEqual(self.load_control().value, count)
         self.assertTrue(any(f"= {count*100} g" in m.value for m in self.app.markdown))
         self.app.slider(key="span_cm").set_value(100)
@@ -214,7 +311,7 @@ class BridgeLearningTests(unittest.TestCase):
     def test_load_limit_blocks_excess_and_zero_capacity(self):
         for kind in self.calc["BRIDGE_NAMES"]:
             with self.subTest(kind=kind):
-                self.app.selectbox(key="selected_bridge").set_value("아치교")
+                self.app.selectbox(key="selected_bridge").set_value("트러스교")
                 self.rerun()
                 self.load_control().set_value(20)
                 self.rerun()

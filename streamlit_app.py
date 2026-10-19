@@ -5,6 +5,8 @@
 """
 
 import math
+import re
+from html import escape
 
 import numpy as np
 import plotly.graph_objects as go
@@ -79,44 +81,91 @@ SUPPORT_COLOR = "#8195a7"
 # 내부 힘을 읽기 위한 그림용 두께입니다. 계산 단면과 별개입니다.
 BEAM_HALF_DEPTH = .8
 TOWER_BASE_DEPTH = 1.6  # 주탑 하부와 기초를 잇는 그림용 길이
+WEIGHT_BODY_HEIGHT = .16  # 아래 치수는 추 아이콘을 그리기 위한 값입니다.
+WEIGHT_RING_HEIGHT = .08
+WEIGHT_STACK_STEP = .28
 PLOT_CONFIG = {"displayModeBar": False, "responsive": True}
 
 st.set_page_config(page_title="교량 구조 디지털 탐구 학습지", page_icon="🌉", layout="wide", initial_sidebar_state="collapsed")
-# Streamlit의 테마 변수를 사용하면 설정에서 테마를 바꾸는 즉시 반영됩니다.
-# 글자·배경을 밝은 색으로 고정하면 다크 모드에서 대비가 사라지므로 피합니다.
+# 본문 색을 상속하고 배경·테두리는 그 색을 옅게 섞어 밝은/어두운 테마에 대응합니다.
 st.markdown(
     """
     <style>
-    .block-container { max-width: 1500px; padding-top: 2rem; padding-bottom: 3rem; }
-    h1 { font-size: clamp(1.65rem, 3vw, 2.45rem) !important; letter-spacing: -.04em; }
-    h2 { font-size: clamp(1.4rem, 2.5vw, 1.9rem) !important; line-height: 1.4; word-break: keep-all; }
-    h3 { font-size: clamp(1.2rem, 2.1vw, 1.55rem) !important; line-height: 1.45; word-break: keep-all; }
+    .block-container { max-width: 1280px; padding-top: 2.5rem; padding-bottom: 4rem; }
+    h1, h2, h3, h4 { word-break: keep-all; overflow-wrap: anywhere; }
+    h1 { font-size: clamp(1.8rem, 3vw, 2.4rem) !important; letter-spacing: -.035em; line-height: 1.35; }
+    h2 { font-size: clamp(1.5rem, 2.5vw, 1.9rem) !important; line-height: 1.4; }
+    h3 { font-size: clamp(1.3rem, 2.1vw, 1.55rem) !important; line-height: 1.45; }
+    h4 { font-size: 1.1rem !important; line-height: 1.5; }
+    [data-testid="stMain"] [data-testid="stMarkdownContainer"] p,
+    [data-testid="stMain"] [data-testid="stMarkdownContainer"] li {
+        font-size: 1rem; line-height: 1.75; word-break: keep-all; overflow-wrap: anywhere;
+    }
+    [data-testid="stMain"] [data-testid="stCaptionContainer"] { color: inherit; }
+    [data-testid="stMain"] [data-testid="stCaptionContainer"] p {
+        font-size: .9rem; line-height: 1.65;
+        word-break: keep-all; overflow-wrap: break-word;
+        color: color-mix(in srgb, currentColor 78%, transparent);
+    }
+    [data-testid="stWidgetLabel"] p { font-weight: 600; }
+    [data-testid="stMain"] button { min-height: 44px; }
+    [data-testid="stExpander"] { border-radius: 8px; }
+    [data-testid="stExpander"] summary { min-height: 44px; }
+    .st-key-bridge_intro { margin-top: .5rem; margin-bottom: 1.25rem; }
+    .st-key-bridge_intro [data-testid="stHorizontalBlock"] { gap: 2rem; }
+    .force-compression, .force-tension {
+        display: inline; padding: .08em .25em; border-radius: 4px; font-weight: 700;
+        -webkit-box-decoration-break: clone; box-decoration-break: clone;
+    }
+    .force-compression { color: #982f2f; background: #ffeded; }
+    .force-tension { color: #185797; background: #eaf3ff; }
+    .concept-focus { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .25em; }
+    .load-path { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: .5rem 0 .75rem; }
+    .path-segment { display: inline-flex; align-items: center; gap: .5rem; max-width: 100%; }
+    .path-node { padding: .35rem .55rem; background: color-mix(in srgb, currentColor 6%, transparent); border-radius: 5px; line-height: 1.6; word-break: keep-all; }
+    .path-arrow { font-size: 1.15rem; }
+    .study-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; padding: 0; margin: .5rem 0 1rem; list-style: none; }
+    .study-steps li { display: flex; gap: .65rem; align-items: flex-start; }
+    .study-steps strong, .study-steps small { display: block; }
+    .study-steps small { font-size: .9rem; line-height: 1.65; margin-top: .35rem; }
+    .learning-icon { width: 22px; height: 22px; vertical-align: -.25em; flex-shrink: 0; }
+    .study-steps .learning-icon { width: 26px; height: 26px; margin-top: .15rem; }
+    .force-primer { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; margin: .25rem 0 1rem; }
+    .force-primer section { display: flex; align-items: center; gap: .65rem; }
+    .force-primer svg { width: 108px; height: 72px; flex-shrink: 0; }
+    .force-primer strong, .force-primer small { display: block; }
+    .force-primer small { font-size: .9rem; line-height: 1.6; margin-top: .35rem; }
+    .experiment-focus { font-size: 1.05rem; line-height: 1.8; margin: 0; }
+    .st-key-load { margin-top: .25rem; }
+    .st-key-load [data-testid="stSlider"] { padding: .5rem .25rem; }
+    .st-key-load input[type="range"]:focus-visible { outline: 2px solid #177568; }
     [data-testid="stMetric"] {
-        background: var(--secondary-background-color, transparent);
-        border: 1px solid rgba(128,128,128,.28);
-        border-radius: 14px; padding: 14px 18px;
+        background: color-mix(in srgb, currentColor 4%, transparent);
+        border: none; border-left: 3px solid #177568;
+        border-radius: 8px; padding: 18px 20px;
     }
     [data-testid="stMetricLabel"] *,
     [data-testid="stMetricValue"] * {
         white-space: normal !important; overflow: visible !important;
         text-overflow: clip !important; overflow-wrap: anywhere;
     }
-    [data-testid="stMetricValue"] {
-        font-size: clamp(1.25rem, 2vw, 1.8rem);
-        line-height: 1.2;
+    [data-testid="stMain"] [data-testid="stMetricValue"] [data-testid="stMarkdownContainer"] p {
+        font-size: clamp(1.6rem, 2.5vw, 2rem);
+        line-height: 1.3; font-variant-numeric: tabular-nums;
     }
-    [data-testid="stTabs"] [role="tablist"] { gap: 8px; }
+    [data-testid="stTabs"] [role="tablist"] { gap: 12px; margin-bottom: 1rem; }
     [data-testid="stTabs"] [role="tab"] {
-        padding: 12px 16px; border-radius: 10px; height: auto; white-space: normal;
-        background: var(--secondary-background-color, transparent);
-        color: var(--text-color, inherit);
+        padding: 12px 14px; border-radius: 6px 6px 0 0; height: auto; white-space: nowrap;
+        background: transparent;
+        color: inherit;
     }
     [data-testid="stTabs"] [aria-selected="true"] {
-        background: color-mix(in srgb, var(--primary-color) 16%, var(--background-color));
-        color: var(--text-color, inherit);
+        background: rgba(23,117,104,.07);
+        font-weight: 600;
     }
     [data-testid="stPlotlyChart"] {
-        border: 1px solid rgba(128,128,128,.28); border-radius: 14px; overflow: hidden;
+        border: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+        border-radius: 10px; overflow: hidden;
     }
     /* 좁은 화면에서도 작은 보기 버튼은 그림 오른쪽에 유지합니다. */
     .st-key-bridge_viewport [data-testid="stHorizontalBlock"] {
@@ -134,6 +183,16 @@ st.markdown(
     .st-key-bridge_zoom_controls button p { font-size: 1.25rem; }
     .st-key-bridge_zoom_controls [data-testid="stCaptionContainer"] {
         text-align: center;
+    }
+    [data-testid="stDataFrame"] { border-radius: 8px; }
+    @media (max-width: 640px) {
+        .block-container { padding: 3.5rem 1rem 3rem; }
+        [data-testid="stTabs"] [role="tablist"] { gap: 4px; }
+        [data-testid="stTabs"] [role="tab"] { padding: 12px 10px; }
+        .st-key-bridge_intro [data-testid="stHorizontalBlock"] { gap: .5rem; }
+        .study-steps, .force-primer { grid-template-columns: 1fr; gap: 1rem; }
+        .force-primer svg { width: 100px; }
+        .st-key-bridge_zoom_controls button { border-radius: 8px; }
     }
     /* 안내 화면에만 글자 크기·줄 간격을 적용합니다. */
     .st-key-lab_guide { max-width: 1080px; margin: 0 auto; }
@@ -198,7 +257,7 @@ def build_model(kind, cfg, braced=True):
     def roller(i):
         fixed.add(3*i+1)
 
-    # 종이는 무게를 펴서 전달합니다. 휨 강성은 양옆의 연속된 보가 담당합니다.
+    # 상판의 휨 강성은 양옆의 연속된 보가 담당합니다.
     for i in range(n):
         member(i, i+1, "beam", "바닥 보", L if kind != "트러스교" else L/n)
 
@@ -254,6 +313,18 @@ def build_model(kind, cfg, braced=True):
             for c, d in zip(cable[1:-1], deck[1:-1]):
                 member(c, d, "cable", "수직 매다는 줄")
 
+    # 추는 언제나 경간 중앙에 놓습니다. 홀수 칸 트러스는 중앙의 보만
+    # 수치적으로 나눕니다. 새 지지대·힌지를 만들거나 좌굴 길이를 줄이지 않습니다.
+    load_node = next((i for i in deck if math.isclose(nodes[i][0], L/2, rel_tol=0., abs_tol=1e-12)), None)
+    if load_node is None:
+        load_node = node(L/2, 0.)
+        deck.append(load_node)
+        deck.sort(key=lambda i: nodes[i][0])
+        for index, e in enumerate(members):
+            if e["role"] == "바닥 보" and nodes[e["i"]][0] < L/2 < nodes[e["j"]][0]:
+                members[index:index+1] = [dict(e, j=load_node), dict(e, i=load_node)]
+                break
+
     nodes = np.array(nodes, dtype=float)
     main_length = sum(math.dist(nodes[e["i"]], nodes[e["j"]]) for e in members if e["form"] != "cable")
     # '같은 골조 재료량'은 모든 나무 막대의 총부피를 단순교와 같게 맞춥니다.
@@ -276,7 +347,7 @@ def build_model(kind, cfg, braced=True):
         mass += e["mass"]
     paper_mass = cfg["paper_gsm"]/1000 * L*cfg["width"]
     return dict(kind=kind, nodes=nodes, members=members, fixed=sorted(fixed), deck=deck,
-                span=L, mass=mass+paper_mass, paper_mass=paper_mass,
+                span=L, load_node=load_node, mass=mass+paper_mass, paper_mass=paper_mass,
                 cable_mass=cable_mass, skeleton_mass=mass-cable_mass,
                 section_mm=(b*1000, h*1000), braced=braced, weight_mass=cfg["weight_mass"],
                 view_y=(min(-5., -12*(cfg["arch_ratio"]+.03)-1), max(10.5, 12*cfg["tower_ratio"]+3)))
@@ -328,18 +399,16 @@ def assemble(model, cfg):
         qxy = np.zeros((2, 2))
         if e["form"] == "beam":
             dead = e["mass"]*GRAVITY if cfg["self_weight"] else 0.
-            live = 0.
             if e["role"] == "바닥 보":
                 share = e["length"]/model["span"]
                 dead += model["paper_mass"]*GRAVITY*share if cfg["self_weight"] else 0.
-                live = cfg["weight_mass"]*GRAVITY*share
-            for col, total in enumerate([dead, live]):
-                fe[:, col], qxy[:, col] = distributed_load(e, T, total)[0], distributed_load(e, T, total)[1:]
+            fe[:, 0], qxy[0, 0], qxy[1, 0] = distributed_load(e, T, dead)
             F[ds] += T.T@fe
         elif cfg["self_weight"]:
             for i in [e["i"], e["j"]]:
                 F[3*i+1, 0] -= e["mass"]*GRAVITY/2
         pieces.append((k, T, ds, kg, fe, qxy))
+    F[3*model["load_node"]+1, 1] = -cfg["weight_mass"]*GRAVITY
     return K, F, pieces
 
 
@@ -404,7 +473,7 @@ def recover(model, cfg, pieces, u, force, K, active, count):
         if e["form"] != "beam":
             ratios["연결 부분의 힘"] = max(ratios["연결 부분의 힘"], abs(N)/(2*cfg["joint_force"]))
         if e["role"] == "바닥 보":
-            # Hermite 보간 + 균등하중의 정확한 요소 내부 휨 항.
+            # Hermite 보간 + 자체 무게의 균등하중에 대한 요소 내부 휨 항.
             # 1칸 트러스도 중앙 처짐을 놓치지 않도록 절점 사이를 평가합니다.
             for t in np.linspace(0, 1, 9):
                 ux = (1-t)*ul[0]+t*ul[3]
@@ -429,7 +498,7 @@ def recover(model, cfg, pieces, u, force, K, active, count):
 
 @st.cache_data(show_spinner=False, max_entries=100)
 def solve_sweep(kind, cfg, braced=True):
-    """0~20개를 같은 모형으로 계산. 케이블의 압축은 허용하지 않습니다.
+    """중앙 집중 하중으로 추 0~20개를 계산. 케이블의 압축은 허용하지 않습니다.
 
     일단 모든 줄을 넣어 풀고, 눌리는 줄은 제거합니다. 제거한 줄이 다시
     늘어나면 재포함합니다. 수렴/안정성 검사를 통과하지 않으면 수치를 숨깁니다.
@@ -489,10 +558,10 @@ def capacity_text(sweep):
 def base_figure(title, x_range, y_range, height=390):
     fig = go.Figure()
     fig.update_layout(
-        title=dict(text=title, font=dict(size=16)),
+        title=dict(text=title, font=dict(size=17), x=.025, xanchor="left"),
         height=height, margin=dict(l=25, r=25, t=55, b=25),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", showlegend=False,
-        font=dict(family="sans-serif"),
+        font=dict(family="sans-serif", size=14),
         xaxis=dict(range=x_range, showgrid=True, gridcolor="rgba(128,128,128,.18)", zeroline=False,
                    showticklabels=False, fixedrange=True),
         yaxis=dict(range=y_range, showgrid=True, gridcolor="rgba(128,128,128,.18)", zeroline=False,
@@ -537,66 +606,119 @@ def support(fig, x, y=0, roller=False, depth=1.25, half_width=0.4):
 
 
 def draw_weights(fig, count, y_at, positions, arrow_size=0.8, block_width=0.4, total_force=None):
-    """금속 추의 몸체와 고리를 개수만큼 그립니다. 11개부터 두 줄로 쌓습니다."""
+    """같은 위치에 추를 한 개씩 쌓고, 그 위에 전체 하중의 화살표를 그립니다."""
     if count == 0 or not positions:
-        return
+        return None
     for index, x in enumerate(positions):
-        row = index // 10
-        bottom = float(y_at(x)) + 0.1 + row * 0.42
+        bottom = float(y_at(x)) + 0.1 + index * WEIGHT_STACK_STEP
         # 사다리꼴 몸체: 윗부분이 좁고 아래가 넓은 실험용 추 모양입니다.
         path = (
             f"M {x-block_width/2},{bottom} "
             f"L {x+block_width/2},{bottom} "
-            f"L {x+block_width*.30},{bottom+.22} "
-            f"L {x-block_width*.30},{bottom+.22} Z"
+            f"L {x+block_width*.30},{bottom+WEIGHT_BODY_HEIGHT} "
+            f"L {x-block_width*.30},{bottom+WEIGHT_BODY_HEIGHT} Z"
         )
         fig.add_shape(type="path", path=path, name="추 몸체",
                       line=dict(color="#52647c", width=1), fillcolor="#8297aa")
         fig.add_shape(type="circle", name="추 고리",
                       x0=x-block_width*.15, x1=x+block_width*.15,
-                      y0=bottom+.22, y1=bottom+.34,
+                      y0=bottom+WEIGHT_BODY_HEIGHT, y1=bottom+WEIGHT_BODY_HEIGHT+WEIGHT_RING_HEIGHT,
                       line=dict(color="#8297aa", width=2), fillcolor="rgba(0,0,0,0)")
-    for x in np.linspace(min(positions), max(positions), min(count, 3)):
-        y = float(y_at(x))
-        # 화살표 끝을 추 위에 두어 몸체 및 두 번째 줄과 겹치지 않게 합니다.
-        arrow(fig, (x, y+arrow_size+0.65), (x, y+(1.0 if count > 10 else .55)),
-              LOAD_COLOR, count if total_force is None else total_force)
+    x = positions[0]
+    stack_top = float(y_at(x)) + .1 + (count-1)*WEIGHT_STACK_STEP + WEIGHT_BODY_HEIGHT + WEIGHT_RING_HEIGHT
+    arrow_top = stack_top + arrow_size + .3
+    arrow(fig, (x, arrow_top), (x, stack_top+.15), LOAD_COLOR,
+          count if total_force is None else total_force)
+    return arrow_top
 
 
 def weight_positions(count, left, right):
-    if count == 0:
-        return []
-    columns = min(count, 10)
-    xs = [0.5 * (left + right)] if columns == 1 else np.linspace(left, right, columns)
-    return [float(xs[i % columns]) for i in range(count)]
+    return [0.5*(left+right)] * count
 
 
 def chart(fig, key):
     st.plotly_chart(fig, width="stretch", config=PLOT_CONFIG, theme="streamlit", key=key)
 
 
+def highlight_learning_text(text):
+    """원문은 유지하고 학습 용어만 강조합니다. 입력 문자열은 HTML로 이스케이프합니다."""
+    terms = {
+        "압축력": "force-compression", "압축": "force-compression",
+        "인장력": "force-tension", "인장": "force-tension", "처짐": "concept-focus",
+        "휨": "", "삼각형": "", "주케이블": "", "케이블": "", "주탑": "", "행어": "",
+    }
+    def decorate(match):
+        term = match.group()
+        style = terms[term]
+        if style == "concept-focus":
+            return f'<u class="concept-focus">{term}</u>'
+        return f'<span class="{style}">{term}</span>' if style else f"<strong>{term}</strong>"
+    return re.sub("|".join(sorted(terms, key=len, reverse=True)), decorate, escape(text))
+
+
+def learning_icon(name):
+    # 글꼴에 따라 이모지가 네모로 보이지 않도록 같은 모양의 그림 아이콘을 사용합니다.
+    paths = {
+        "book": '<path d="M12 6C9 3 5 3 2 4v15c3-1 7-1 10 1 3-2 7-2 10-1V4c-3-1-7-1-10 2ZM12 6v14"/>',
+        "scale": '<path d="M12 3v18M7 21h10M4 7h16M5 7l-3 8h6L5 7Zm14 0-3 8h6l-3-8Z"/>',
+        "search": '<circle cx="10" cy="10" r="7"/><path d="m15 15 6 6"/>',
+        "bulb": '<path d="M8 16v-2a6 6 0 1 1 8 0v2H8Zm1 3h6m-5 3h4"/>',
+        "arrow": '<path d="M3 12h18m-7-7 7 7-7 7"/>',
+    }
+    return f'<svg class="learning-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">{paths[name]}</svg>'
+
+
+def load_path_diagram(path):
+    branches = []
+    for branch in path.split(" / "):
+        nodes = []
+        for index, node in enumerate(branch.split(" → ")):
+            arrow_html = '<span class="path-arrow" aria-hidden="true">→</span>' if index else ""
+            nodes.append(f'<span class="path-segment">{arrow_html}<span class="path-node">{escape(node)}</span></span>')
+        branches.append('<div class="load-path">' + " ".join(nodes) + '</div>')
+    return '<div aria-label="하중이 전달되는 과정">' + "".join(branches) + '</div>'
+
+
+def force_primer():
+    """인장·압축·처짐을 설명하는 개념 그림입니다. 계산 결과 그림과 구분합니다."""
+    compression = '<rect x="30" y="35" width="100" height="25" rx="3" fill="currentColor" opacity=".1"/><path d="M8 48H58 M47 40L58 48L47 56 M152 48H102 M113 40L102 48L113 56" stroke="#982f2f" stroke-width="3" fill="none"/>'
+    tension = '<rect x="30" y="35" width="100" height="25" rx="3" fill="currentColor" opacity=".1"/><path d="M62 48H8 M19 40L8 48L19 56 M98 48H152 M141 40L152 48L141 56" stroke="#185797" stroke-width="3" fill="none"/>'
+    deflection = '<path d="M15 33H145" stroke="currentColor" opacity=".45" stroke-width="2" stroke-dasharray="4 4"/><path d="M15 33Q80 66 145 33" stroke="currentColor" stroke-width="4" fill="none"/><path d="M80 5V28 M73 20L80 28L87 20" stroke="#c56a20" stroke-width="3" fill="none"/><path d="M80 34V49" stroke="currentColor" stroke-width="2" stroke-dasharray="2 2"/>'
+    items = []
+    for name, style, drawing, description in [
+        ("압축", "force-compression", compression, "안쪽으로 누르는 힘"),
+        ("인장", "force-tension", tension, "바깥쪽으로 당기는 힘"),
+        ("처짐", "concept-focus", deflection, "하중을 받아 아래로 변한 거리"),
+    ]:
+        items.append(f'<section><svg viewBox="0 0 160 85" aria-hidden="true" focusable="false">{drawing}</svg><div><strong class="{style}">{name}</strong><small>{description}</small></div></section>')
+    st.markdown('<div class="force-primer">' + "".join(items) + '</div>', unsafe_allow_html=True)
+
+
 def bridge_chapter_intro(kind):
     guide = BRIDGE_GUIDES[kind]
-    st.subheader("① 교량 구조 알아보기")
-    st.write(guide["shape"])
-    st.write(f"**하중을 견디는 원리**  {guide['principle']}")
-    st.write(f"**하중이 전달되는 과정**  {guide['load_path']}")
-    st.caption(f"활용 상황: {guide['use']}")
-    with st.expander("실제 적용 조건과 사례", expanded=False):
-        st.write(guide["limit"])
-        st.caption(f"사례: {guide['examples']}. 실제 교량은 경간·지반·시공 조건을 함께 고려하여 선택합니다.")
-        st.caption("모형의 상판 보도 하중을 나누어 받습니다. 위 과정은 각 구조의 대표적인 하중 전달 경로입니다.")
+    with st.container(key="bridge_intro"):
+        st.subheader("① 교량 구조 알아보기")
+        st.markdown(f"<p><strong>{escape(guide['title'])}</strong> · {highlight_learning_text(guide['shape'])}</p>", unsafe_allow_html=True)
+        principle, load_path = st.columns([1.1, 1], gap="large")
+        principle.markdown(f'<p>{learning_icon("bulb")} <strong>하중을 견디는 원리</strong></p><p>{highlight_learning_text(guide["principle"])}</p>', unsafe_allow_html=True)
+        load_path.markdown(f'<p>{learning_icon("arrow")} <strong>하중이 전달되는 과정</strong></p>' + load_path_diagram(guide["load_path"]), unsafe_allow_html=True)
+        st.caption(f"활용 상황: {guide['use']}")
+        with st.expander("실제 적용 조건과 사례", expanded=False):
+            st.write(guide["limit"])
+            st.caption(f"사례: {guide['examples']}. 실제 교량은 경간·지반·시공 조건을 함께 고려하여 선택합니다.")
+            st.caption("모형의 상판 보도 하중을 나누어 받습니다. 위 과정은 각 구조의 대표적인 하중 전달 경로입니다.")
 
 
 def data_figure(title, x_title, y_title, height=340):
     fig = go.Figure()
     fig.update_layout(
-        title=dict(text=title, font=dict(size=15)), height=height,
+        title=dict(text=title, font=dict(size=17), x=.025, xanchor="left"), height=height,
+        font=dict(family="sans-serif", size=14),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
         margin=dict(l=55, r=25, t=65, b=60),
-        xaxis=dict(title=x_title, gridcolor="rgba(128,128,128,.18)"),
-        yaxis=dict(title=y_title, gridcolor="rgba(128,128,128,.18)", rangemode="tozero"),
-        legend=dict(orientation="h", y=1.16, x=0),
+        xaxis=dict(title=x_title, gridcolor="rgba(128,128,128,.12)", tickfont=dict(size=13)),
+        yaxis=dict(title=y_title, gridcolor="rgba(128,128,128,.12)", rangemode="tozero", tickfont=dict(size=13)),
+        legend=dict(orientation="h", y=1.16, x=0, font=dict(size=13)),
     )
     return fig
 
@@ -678,7 +800,7 @@ def force_arrow_pair(fig, center, direction, tension, length, name):
         fig.add_annotation(
             name=f"{name}_{side}", ax=float(start[0]), ay=float(start[1]),
             x=float(end[0]), y=float(end[1]), axref="x", ayref="y", xref="x", yref="y",
-            text="", showarrow=True, arrowhead=3, arrowsize=1.1, arrowwidth=2.5,
+            text="", showarrow=True, arrowhead=3, arrowsize=.85, arrowwidth=2.5,
             arrowcolor=TENSION if tension else COMPRESSION,
         )
 
@@ -694,7 +816,7 @@ def add_member_force_arrows(fig, model, result, shown, scale, within, amplify):
                   ("세로 지지대", .75, 55, 35, 0)],
         "트러스교": [("바닥 보", .5, 0, -65, 0), (None, .7, 50, 60, 1),
                     (None, .3, -50, 35, -1)],
-        "사장교": [("바닥 보", .5, 0, 65, 0), ("사장 케이블", .3, 40, -55, 0),
+        "사장교": [("바닥 보", .5, 0, 65, 0), ("사장 케이블", .3, -35, -55, 0),
                   ("주탑", 0., -55, 25, 0)],
         "현수교": [("바닥 보", .5, 0, 65, 0), ("주케이블", .4, -25, -65, 0),
                   ("수직 매다는 줄", .75, 55, 20, 0), ("주탑", 0., -55, 25, 0)],
@@ -716,9 +838,15 @@ def add_member_force_arrows(fig, model, result, shown, scale, within, amplify):
         used.add(index)
         e = model["members"][index]
         axial, moment = result["axial"][index], result["moments"][index]
-        color = TENSION if axial > 1e-7 else COMPRESSION if axial < -1e-7 else "#7160d2" if moment > 1e-9 else SUPPORT_COLOR
+        color = TENSION if axial > 1e-7 else COMPRESSION if axial < -1e-7 else SUPPORT_COLOR
         member_name = {"바닥 보": "상판 아래 보", "수직 매다는 줄": "행어(세로줄)"}.get(e["role"], e["role"])
         text = member_name + (" · 휨" if moment > 1e-9 else "")
+        text_anchor = "center"
+        if e["role"] == "바닥 보" and offset_y < 0:
+            # 중앙에 쌓인 추를 가리지 않도록 위쪽 보 설명은 왼쪽에 둡니다.
+            text = member_name + ("<br>휨" if moment > 1e-9 else "")
+            offset_x = -24 if fraction <= .5 else -44
+            text_anchor = "right"
         if abs(axial) <= 1e-7 and moment <= 1e-9:
             text += "<br>힘 거의 없음"
         endpoints = member_display_points(model, e, shown)
@@ -744,8 +872,31 @@ def add_member_force_arrows(fig, model, result, shown, scale, within, amplify):
             ax=offset_x, ay=offset_y, axref="pixel", ayref="pixel", text=text,
             showarrow=True, arrowhead=0, arrowwidth=1.2, arrowcolor=color,
             bgcolor="rgba(255,255,255,.96)", bordercolor=color, borderwidth=1, borderpad=4,
-            font=dict(size=11, color="#1f2937"), align="center",
+            font=dict(size=13, color="#1f2937"), align="center", xanchor=text_anchor,
         )
+
+
+def draw_unbraced_truss_example(fig, model, scale):
+    """막대 길이와 받침 위치를 유지하는 기구 변형의 설명용 예시입니다."""
+    original = model["nodes"]
+    example = original.copy()
+    deck = model["deck"]
+    height = original[deck[0], 1] - min(original[:, 1])
+    angle = math.radians(35)  # 관찰을 위한 고정 각도이며 계산된 변위가 아닙니다.
+    example[deck, 0] += height * math.sin(angle)
+    example[deck, 1] -= height * (1 - math.cos(angle))
+    for index, member in enumerate(model["members"]):
+        endpoints = [member["i"], member["j"]]
+        if np.allclose(example[endpoints], original[endpoints]):
+            continue
+        points = example[endpoints] * scale
+        fig.add_trace(go.Scatter(
+            x=points[:, 0], y=points[:, 1], mode="lines",
+            line=dict(color="#596778", width=2.5, dash="dash"), showlegend=False,
+            name="사각형의 형태 변화 예시",
+            meta=dict(illustration="unbraced_shear_example", member_index=index),
+            hovertemplate="점선: 사각형의 형태 변화 예시<br>계산된 변형량이 아닙니다.<extra></extra>",
+        ))
 
 
 def structure_figure(sweep, count, amplify, title=None, show_forces=False):
@@ -797,6 +948,9 @@ def structure_figure(sweep, count, amplify, title=None, show_forces=False):
                            left_end=a == model["deck"][0], right_end=b == model["deck"][-1], outline=color, depth=depth)
         else:
             line(fig, xs, ys, color, width, name=name)
+    shear_example = kind == "트러스교" and not model["braced"] and not shape_available
+    if shear_example:
+        draw_unbraced_truss_example(fig, model, scale)
     for node_id in sorted(set(i//3 for i in model["fixed"] if i % 3 == 1)):
         x, y = support_display_point(model, node_id, scale)
         support(fig, x, y, roller=3*node_id not in model["fixed"], depth=.65, half_width=.28)
@@ -809,33 +963,35 @@ def structure_figure(sweep, count, amplify, title=None, show_forces=False):
             distance = math.copysign(min(1.7, abs(value)*.35), value)
             end = (x+distance, y) if dof % 3 == 0 else (x, y+distance)
             arrow(fig, (x, y), end, SUPPORT_COLOR, abs(value))
+    load_x, load_y = 6., depth
     if shape_available:
-        samples = np.array(display_r["deck_samples"])
-        order = np.argsort(samples[:, 0])
-        samples = samples[order]
-        y_at = lambda x: float(np.interp(x/scale, samples[:, 0], samples[:, 2]))*amplify*scale + depth
-    else:
-        y_at = lambda x: depth
+        center = min(display_r["deck_samples"], key=lambda p: abs(p[0]-L/2))
+        load_x = (center[0] + amplify*center[1])*scale
+        load_y = center[2]*amplify*scale + depth
     live_force = count*model["weight_mass"]*GRAVITY
-    draw_weights(fig, count, y_at, weight_positions(count, 1., 11.),
-                 arrow_size=1.2+min(live_force, 5)*.2, block_width=.55, total_force=live_force)
+    load_top = draw_weights(fig, count, lambda x: load_y, weight_positions(count, load_x, load_x),
+                            arrow_size=1.2+min(live_force, 5)*.2, block_width=.55, total_force=live_force)
+    fig.layout.meta.update(load_x=load_x, load_y=load_y, load_top=load_top)
+    status_y = max(9., load_top+1.2) if load_top is not None else 9.
+    fig.update_yaxes(range=[model["view_y"][0], max(model["view_y"][1], status_y+1.3)])
     if show_forces:
         add_member_force_arrows(fig, model, display_r, shown, scale, shape_available, amplify)
         fig.add_annotation(
             name="force_legend", x=.5, y=1.12, xref="paper", yref="paper", yanchor="bottom",
             text=f'<span style="color:{COMPRESSION}">→ ← 압축: 안으로 누름</span><br>'
                  f'<span style="color:{TENSION}">← → 인장: 밖으로 당김</span>',
-            showarrow=False, font=dict(size=11, color="#1f2937"),
+            showarrow=False, font=dict(size=13, color="#1f2937"),
             bgcolor="rgba(255,255,255,.96)", borderpad=4,
         )
     if not within and has_valid_shape:
-        label(fig, 6, 8.4, f"기준 초과 · 추 {display_count}개 상태 유지<br>추는 현재 {count}개 · 붕괴 후 예측 아님")
+        label(fig, 6, status_y, f"기준 초과 · 추 {display_count}개 상태 유지<br>추는 현재 {count}개 · 붕괴 후 예측 아님")
     elif not within and shape_available:
-        label(fig, 6, 8.4, f"처음부터 기준 초과 · {display_count}개 참고 모습 유지<br>추는 현재 {count}개 · 붕괴 후 예측 아님")
+        label(fig, 6, status_y, f"처음부터 기준 초과 · {display_count}개 참고 모습 유지<br>추는 현재 {count}개 · 붕괴 후 예측 아님")
     elif not r["stable"]:
-        label(fig, 6, 7.8, "현재 연결 상태에서는 형태를 유지하기 어렵습니다.<br>변형 없이 뼈대를 표시합니다.")
+        label(fig, 6, status_y, "점선: 사각형이 기울어지는 예시<br>실제 변형량을 계산한 결과가 아닙니다." if shear_example
+              else "현재 연결 상태에서는 형태를 유지하기 어렵습니다.<br>변형 없이 뼈대를 표시합니다.")
     else:
-        label(fig, 6, 9., f"변형 {amplify}배 확대 · 실제 처짐은 아래 수치로 확인")
+        label(fig, 6, status_y, f"변형 {amplify}배 확대 · 실제 처짐은 아래 수치로 확인")
     label(fig, 6, model["view_y"][0]+.5, f"받침 사이 {L*100:.0f} cm")
     return fig
 
@@ -844,19 +1000,24 @@ def experiment_figure(sweep, count, amplify, zoom):
     """실험 화면의 카메라만 확대합니다. 부재 좌표와 계산값은 그대로 둡니다."""
     fig = structure_figure(sweep, count, amplify, show_forces=True)
     ys = [float(y) for trace in fig.data for y in trace.y if y is not None]
-    bottom, top = min(ys) - 2., max(ys) + 4.
+    bottom, top = min(ys) - 2.2, max(ys) + (3.5 if count else 2.7)
     if sweep["model"]["kind"] in ("사장교", "현수교"):
         deck_top = max(float(y) for trace in fig.data if (trace.name or "").startswith("바닥 보") for y in trace.y)
         bottom, top = min(ys) - 1.5, max(max(ys) + 1.25, deck_top + 3.5)
+    if fig.layout.meta["load_top"] is not None:
+        top = max(top, fig.layout.meta["load_top"] + .8)
     center_y = (bottom + top) / 2
-    half_y = max(8., top - bottom) / (2 * zoom)
-    half_x = 11.2 / zoom
-    fig.update_layout(height=480, dragmode="pan", margin=dict(t=110, b=40),
-                      title=dict(y=.99, yanchor="top"))
+    half_y = max(7., top - bottom) / (2 * zoom)
+    # 짧은 교량은 화면을 더 넓게 사용하고, 케이블교는 뒤쪽 앵커까지 보입니다.
+    half_x = (11.2 if sweep["model"]["kind"] in ("사장교", "현수교") else 8.) / zoom
+    fig.update_layout(height=440, dragmode="pan", margin=dict(l=18, r=18, t=105, b=38),
+                      title=dict(y=.98, yanchor="top"))
     fig.update_xaxes(range=[6 - half_x, 6 + half_x], fixedrange=False)
     fig.update_yaxes(range=[center_y - half_y, center_y + half_y], fixedrange=False)
     # 상태와 경간 안내는 카메라 확대에도 화면 가장자리에 남겨 둡니다.
     fig.layout.annotations[-2].update(x=.5, y=1.02, xref="paper", yref="paper", yanchor="bottom")
+    if not fig.layout.meta["frozen"]:
+        fig.layout.annotations[-2].update(text=f"변형 {amplify}배 확대")
     fig.layout.annotations[-1].update(x=.5, y=-.02, xref="paper", yref="paper", yanchor="top")
     return fig
 
@@ -924,9 +1085,10 @@ def load_change_observation(sweep, count, previous_count):
         return "변경 전후에 계산할 수 없는 상태가 있어 처짐을 비교하지 않습니다."
     delta = after["deflection_mm"] - before["deflection_mm"]
     change = "커졌습니다" if delta > 1e-9 else "작아졌습니다" if delta < -1e-9 else "거의 같습니다"
-    return (f"같은 구조·설정에서 추 {previous_count}개 → {count}개: "
-            f"계산된 최대 처짐이 {before['deflection_mm']:.4f} → {after['deflection_mm']:.4f} mm로 {change}. "
-            "표시 자릿수보다 작은 차이는 숫자가 같아 보일 수 있습니다.")
+    before_text, after_text = f"{before['deflection_mm']:.4f}", f"{after['deflection_mm']:.4f}"
+    rounding_note = "\n\n작은 변화는 반올림되어 같은 숫자로 보일 수 있습니다." if before_text == after_text and abs(delta) > 1e-9 else ""
+    return (f"같은 구조·설정 · **추 {previous_count}개 → {count}개**\n\n"
+            f"최대 **처짐**: **{before_text} → {after_text} mm** · {change}." + rounding_note)
 
 
 def show_result(sweep, count, amplify, key, figure_slot=None, previous_count=None, view_zoom=None):
@@ -938,7 +1100,7 @@ def show_result(sweep, count, amplify, key, figure_slot=None, previous_count=Non
     else:
         with figure_slot:
             chart(fig, key)
-    st.markdown("**하중을 받으면 어떻게 변할까?**")
+    st.markdown("#### 하중을 받으면 어떻게 변할까?")
     frozen_count = fig.layout.meta["display_count"]
     if not r["stable"]:
         st.warning("현재 연결 상태에서는 구조의 형태를 유지하기 어렵습니다. 대각선 보강과 받침 조건을 확인하세요.")
@@ -947,15 +1109,18 @@ def show_result(sweep, count, amplify, key, figure_slot=None, previous_count=Non
                    f"추는 현재 {count}개이며, 처짐 수치는 선형 참고값입니다.")
     elif r["utilization"] >= .8:
         st.info("설정한 기준에 가까워졌습니다. 어떤 부재의 힘과 처짐이 변했는지 살펴보세요.")
-    st.metric("최대 처짐" if not fig.layout.meta["frozen"] else "현재 하중의 처짐 · 참고 계산",
-              "계산 불가" if not r["stable"] else f"{r['deflection_mm']:.4f} mm")
-    if r["stable"]:
-        st.progress(min(1., r["utilization"]), text="설정한 한계 기준에 접근하는 정도")
-    change = load_change_observation(sweep, count, previous_count)
-    if change:
-        st.info(change)
-    observed_count = frozen_count if fig.layout.meta["frozen"] and frozen_count is not None else count
-    st.write(force_observation(sweep, observed_count))
+    measurement, observation = st.columns([1, 2], gap="large", vertical_alignment="center")
+    with measurement:
+        st.metric("최대 처짐" if not fig.layout.meta["frozen"] else "현재 하중의 처짐 · 참고 계산",
+                  "계산 불가" if not r["stable"] else f"{r['deflection_mm']:.4f} mm")
+    with observation:
+        if r["stable"]:
+            st.progress(min(1., r["utilization"]), text="설정한 한계 기준에 접근하는 정도")
+        change = load_change_observation(sweep, count, previous_count)
+        if change:
+            st.info(change)
+        observed_count = frozen_count if fig.layout.meta["frozen"] and frozen_count is not None else count
+        st.markdown(highlight_learning_text(force_observation(sweep, observed_count)), unsafe_allow_html=True)
     st.caption(f"그림의 변형은 {amplify}배로 확대합니다. 보의 두께와 힘 화살표의 길이는 실제 치수나 힘의 크기를 뜻하지 않습니다.")
     with st.expander("심화 결과 · 한계와 계산 정보", expanded=False):
         st.write(f"이 모형에서 기준 이내인 추: **{capacity_text(sweep)}** (0~20개 계산). 실제 교량의 성능 순위가 아닙니다.")
@@ -974,9 +1139,9 @@ def show_result(sweep, count, amplify, key, figure_slot=None, previous_count=Non
 
 
 def load_curve(sweeps, names, count, include_reference=False):
-    fig = data_figure("추 개수에 따른 처짐", "추 개수", "최대 처짐 (mm)", 400)
-    fig.update_layout(margin=dict(t=55, b=110),
-                      legend=dict(orientation="h", y=-.28, x=0, yanchor="top"))
+    fig = data_figure("추 개수에 따른 처짐", "추 개수", "최대 처짐 (mm)", 440)
+    fig.update_layout(margin=dict(t=60, b=125),
+                      legend=dict(orientation="h", y=-.3, x=0, yanchor="top", entrywidth=90))
     for kind in names:
         sweep = sweeps[kind]
         for within in [True, False]:
@@ -1070,20 +1235,21 @@ with guide_tab:
         st.title("교량 구조 디지털 탐구 학습지")
         st.write("교량 구조를 배우고 실험·실습을 대신할 수 있는 디지털 학습 자료입니다.")
         st.subheader("학습 순서")
-        st.markdown("1. **교량 구조 알아보기** — 모양과 주요 부재, 하중이 전달되는 과정을 살펴봅니다.\n"
-                    "2. **하중 실험하기** — 추를 늘리며 처짐과 인장·압축의 변화를 관찰합니다.\n"
-                    "3. **교량 비교하기** — 같은 조건에서 교량별 처짐과 하중 전달 방식의 차이를 살펴봅니다.")
-        st.write("이 활동을 통해 다섯 교량의 구조적 특징과 하중 전달 원리를 설명할 수 있습니다.")
+        st.markdown('<ol class="study-steps">'
+                    f'<li>{learning_icon("book")}<div><strong>교량 구조 알아보기</strong><small>모양·주요 부재·하중 전달 과정</small></div></li>'
+                    f'<li>{learning_icon("scale")}<div><strong>하중 실험하기</strong><small>추를 늘리며 처짐과 힘의 변화 관찰</small></div></li>'
+                    f'<li>{learning_icon("search")}<div><strong>교량 비교하기</strong><small>같은 조건에서 구조와 결과 비교</small></div></li>'
+                    '</ol>', unsafe_allow_html=True)
         st.subheader("그림 읽기")
-        st.markdown("- **빨강 → ← 압축**: 부재를 안쪽으로 누르는 힘\n"
-                    "- **파랑 ← → 인장**: 부재를 바깥쪽으로 당기는 힘\n"
-                    "- **처짐**: 하중을 받아 상판이 아래로 변한 거리(mm)")
+        force_primer()
+        st.caption("위 그림은 힘과 처짐을 설명하는 개념 그림입니다.")
         st.caption("주황 화살표는 추의 하중, 회색 화살표는 받침이 구조를 지지하는 힘을 나타냅니다.")
-        st.write("그림의 변형과 보의 두께는 관찰하기 쉽도록 확대합니다. 실제 계산된 처짐은 mm 수치로 확인합니다.")
+        st.markdown('그림의 변형과 보의 두께는 관찰하기 쉽도록 확대합니다. <u class="concept-focus">실제 처짐은 mm 수치</u>로 확인합니다.', unsafe_allow_html=True)
         st.subheader("디지털 실험·실습")
         st.caption("수업자료: 「다양한 교량의 구조」 → 「교량 만들기 실습」")
-        st.write("종이·수수깡 모형에 지우개를 올리는 실험을 대신해, 화면에서 추를 조절하며 처짐과 인장·압축을 관찰합니다.")
-        st.caption("재료와 연결 방식이 단순화된 모형이므로 실물 실험과 결과가 같을 필요는 없습니다. 실제 교량을 설계하거나 성능 순위를 정하는 도구가 아닙니다.")
+        st.markdown(highlight_learning_text("화면에서 추를 조절하며 처짐과 인장·압축을 관찰합니다."), unsafe_allow_html=True)
+        with st.expander("실물 실험과 다른 점", expanded=False):
+            st.write("재료와 연결 방식이 단순화된 모형이므로 실물 실험과 결과가 같을 필요는 없습니다. 실제 교량을 설계하거나 성능 순위를 정하는 도구가 아닙니다.")
 
 with lab_tab:
     selected_bridge = st.selectbox("학습할 교량", BRIDGE_NAMES,
@@ -1111,8 +1277,8 @@ if "load" in st.session_state:
 with chapter_section:
     bridge_chapter_intro(selected_bridge)
     st.subheader("② 하중 실험하기")
-    st.write("**추의 개수를 늘리면 교량은 어떻게 변할까?**")
-    st.caption("처짐, 인장·압축 화살표, 받침으로 전달되는 힘을 관찰하세요.")
+    st.markdown(f'<p class="experiment-focus">{learning_icon("search")} 추의 개수를 늘리면 <u class="concept-focus">교량은 어떻게 변할까?</u></p>', unsafe_allow_html=True)
+    st.markdown('<p><strong>관찰할 것</strong> · ' + highlight_learning_text("처짐 · 인장·압축의 방향 · 하중 전달") + '</p>', unsafe_allow_html=True)
     zoom_percent = st.session_state.get("bridge_zoom_percent", 100)
     with st.container(key="bridge_viewport"):
         figure_column, zoom_column = st.columns([1, .05], gap="small", vertical_alignment="center")
@@ -1141,7 +1307,7 @@ with chapter_section:
     elif load == load_limit and not selected_sweep["censored"]:
         st.caption("현재 조절 범위의 끝입니다. 심화 설정에서 한계 초과 참고 계산을 선택할 수 있습니다.")
     st.write(f"추 **{load}개 × {mass_g} g = {load*mass_g} g**")
-    st.caption("추의 무게는 상판 전체에 고르게 작용하는 것으로 가정합니다.")
+    st.caption("추는 중앙의 같은 위치에 쌓습니다. 추가 하중도 이 위치에 집중하여 계산합니다.")
     context = (selected_bridge, tuple(sorted(cfg.items())), reinforced if selected_bridge == "트러스교" else True)
     previous = st.session_state.get("_last_observation", {})
     previous_count = previous.get("count") if previous.get("context") == context else None
@@ -1200,7 +1366,7 @@ with chapter_section:
 
 with comparison_tab:
     st.header("③ 교량 비교하기")
-    st.caption(f"같은 조건: 받침 사이 {span_cm} cm · 추 1개 {mass_g} g · 현재 추 {load}개 · {comparison_basis}")
+    st.caption(f"같은 조건: 받침 사이 {span_cm} cm · 추 1개 {mass_g} g · 중앙에 추 {load}개 · {comparison_basis}")
     st.caption("케이블·종이·받침의 재료량은 같지 않을 수 있습니다. 트러스교는 대각선 보강 구조입니다.")
     with st.expander("비교 조건과 다른 점", expanded=False):
         if cfg["equal_volume"]:
@@ -1233,7 +1399,7 @@ with comparison_tab:
             "현재 처짐 (mm)": "계산 불가" if not r["stable"] else f"{r['deflection_mm']:.4f}" + (" (참고)" if r["utilization"] > 1+1e-9 else ""),
             "구조적 특징": guide["comparison_structure"], "주요 원리": guide["comparison_principle"],
         })
-    st.dataframe(rows, hide_index=True, width="stretch", key="learning_comparison", column_config={
+    st.dataframe(rows, hide_index=True, width="stretch", row_height=56, key="learning_comparison", column_config={
         "교량": st.column_config.TextColumn(width=115), "모형 한계 (추)": st.column_config.TextColumn(width=115),
         "현재 처짐 (mm)": st.column_config.TextColumn(width=135),
         "구조적 특징": st.column_config.TextColumn(width=230), "주요 원리": st.column_config.TextColumn(width=260),
