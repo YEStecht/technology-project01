@@ -23,37 +23,47 @@ COLORS = {
 BRIDGE_GUIDES = {
     "단순교": {
         "title": "단순교 (거더교)",
-        "feature": "바닥판 아래의 보(가로로 놓인 긴 구조물)가 무게를 양쪽 받침으로 전달합니다.",
-        "advantage": "구조가 단순하고 공사 기간이 짧으며 제작 비용이 저렴함.",
-        "disadvantage": "무게를 올리면 가운데가 많이 휘어, 받침과 받침 사이를 너무 멀리 띄우기 어려움.",
-        "examples": "한강대교 일부, 일반 육교 및 고속도로 교량",
+        "situation": "짧은 하천을 경제적으로 건너야 할 때 고려할 수 있습니다. 짧은 경간에서는 구조가 단순해 시공과 비용 면에서 유리할 수 있습니다.",
+        "fit": "짧은 경간에서는 보와 상판으로 하중을 간단히 전달할 수 있어 경제적인 선택이 될 수 있습니다.",
+        "load_path": "추·차량 하중 → 상판 아래 보 → 양쪽 받침 → 지반. 보는 휘면서 윗부분은 압축, 아랫부분은 인장을 받습니다.",
+        "question": "추를 늘릴 때 모형의 처짐과 보의 위·아래 색을 살펴보세요.",
+        "disadvantage": "경간이 길어지면 보의 휨과 처짐이 커져 더 큰 보나 추가 받침이 필요할 수 있습니다.",
+        "examples": "일반 도로와 육교의 일부",
     },
     "아치교": {
         "title": "아치교",
-        "feature": "둥근 아치를 따라 누르는 힘을 양쪽 받침으로 보냅니다. 받침은 옆으로 밀리지 않도록 버텨 줍니다.",
-        "advantage": "무게를 아치 양끝으로 나누어 보내 누르는 힘을 잘 견딤. 받침 사이를 넓힐 수 있음.",
-        "disadvantage": "양쪽 받침 아래의 땅이 단단해야 하며, 둥근 아치를 만들고 설치하는 과정이 복잡함.",
-        "examples": "방화대교, 시드니 하버 브릿지",
+        "situation": "양쪽 지반과 교대가 튼튼한 계곡에서 고려할 수 있습니다. 아치가 하중을 양쪽으로 보내므로 교대가 옆으로 미는 힘을 버텨야 합니다.",
+        "fit": "견고한 양쪽 교대가 아치의 압축력과 바깥쪽 수평 힘을 받아 줄 수 있을 때 적합한 선택이 될 수 있습니다.",
+        "load_path": "상판 → 세로 지지대 → 아치의 압축 → 양쪽 교대·지반. 아치 받침에는 바깥쪽 수평 힘도 생깁니다.",
+        "question": "추를 늘릴 때 아치의 압축력과 받침이 옆으로 버티는 힘을 살펴보세요.",
+        "disadvantage": "지반이나 교대가 약하면 수평 힘에 불리하고, 아치를 만들고 설치하는 과정도 고려해야 합니다.",
+        "examples": "시드니 하버 브리지 등",
     },
     "트러스교": {
         "title": "트러스교",
-        "feature": "삼각형으로 연결된 막대들이 누르는 힘과 당기는 힘을 나누어 받습니다.",
-        "advantage": "삼각형 보강으로 잘 찌그러지지 않으며, 비교적 적은 재료로 가볍고 튼튼하게 만들 수 있음.",
-        "disadvantage": "막대끼리 연결한 곳이 많아 조립과 점검·수리가 복잡함.",
-        "examples": "성수대교, 철도교량",
+        "situation": "무거운 열차가 지나 높은 강성이 필요한 교량에 고려할 수 있습니다. 삼각형 뼈대가 모양 변화를 줄이는 데 유리할 수 있습니다.",
+        "fit": "삼각형 부재가 인장과 압축을 나누어 받아 구조의 강성을 높일 수 있습니다.",
+        "load_path": "상판 → 삼각형 트러스 부재 → 받침. 부재는 배치에 따라 인장 또는 압축을 받고, 상판 보는 휨을 받습니다.",
+        "question": "추를 늘릴 때 삼각형 막대의 인장·압축 색과 처짐을 살펴보세요. 열차는 하중 상황의 비유이며, 모형에는 추의 균등하중이 작용합니다.",
+        "disadvantage": "길고 가는 압축 부재는 좌굴할 수 있고 연결부도 약점이 됩니다. 긴 경간에서는 부재와 자중이 늘 수 있습니다.",
+        "examples": "철도 트러스교 등",
     },
     "사장교": {
         "title": "사장교",
-        "feature": "주탑에서 비스듬히 뻗은 줄이 바닥판을 직접 당겨서 받쳐 줍니다.",
-        "advantage": "비스듬한 줄이 바닥판을 직접 받쳐 주어, 중간에 받침을 많이 세우지 않고 길고 아름다운 다리를 만들 수 있음.",
-        "disadvantage": "현수교보다 주탑 주변의 바닥판이 강하게 눌릴 수 있음. 바람에 흔들리는 정도도 꼼꼼히 살펴야 함.",
+        "situation": "중간 교각을 놓기 어려운 넓은 강에서 고려할 수 있습니다. 경사진 케이블이 상판을 직접 받쳐 중·장경간에 활용됩니다.",
+        "fit": "주탑에서 뻗은 케이블이 상판을 직접 지지해 중간 교각 수를 줄이는 데 도움이 될 수 있습니다.",
+        "load_path": "상판 → 사장 케이블(인장)·상판 보(휨) → 주탑(주로 압축) → 기초. 뒤쪽 케이블은 앵커로 힘을 전달합니다.",
+        "question": "추를 늘릴 때 케이블이 당겨지는 정도와 상판 처짐을 살펴보세요.",
+        "disadvantage": "주탑·케이블의 시공과 점검이 필요하며, 실제 교량에서는 바람과 진동도 고려해야 합니다.",
         "examples": "인천대교, 서해대교",
     },
     "현수교": {
         "title": "현수교",
-        "feature": "굵은 주케이블에 세로줄로 바닥판을 매답니다. 주탑과 양끝의 고정 장치(앵커리지)가 함께 버팁니다.",
-        "advantage": "굵은 주케이블과 양끝 고정 장치 덕분에 다섯 교량 형식 중 가운데 받침 사이를 가장 길게 만들 수 있음.",
-        "disadvantage": "큰 고정 장치를 만들고 케이블을 설치하는 비용이 많이 듦. 바람과 지진의 흔들림을 견디도록 꼼꼼히 설계해야 함.",
+        "situation": "중간 교각을 놓기 어려운 해협에서 초장경간을 건널 때 고려할 수 있습니다. 긴 주케이블이 상판을 매달아 지지합니다.",
+        "fit": "긴 주케이블로 넓은 물길을 건널 수 있어 초장경간에 적합한 구조 중 하나입니다.",
+        "load_path": "상판 → 행어(인장) → 주케이블(인장) → 주탑(압축)·앵커리지. 하중은 케이블과 지지 구조를 거쳐 지반으로 전달됩니다.",
+        "question": "현재 모형의 행어·주케이블 장력과 상판 처짐을 살펴보세요. 이 추 실험은 실제 초장경간 성능을 검증하지 않습니다.",
+        "disadvantage": "바람 진동, 상판 강성, 케이블과 앵커리지의 시공 조건이 불리한 요인이 될 수 있습니다.",
         "examples": "이순신대교, 남해대교, 금문교(Golden Gate Bridge)",
     },
 }
@@ -84,9 +94,12 @@ COMPRESSION = "#e05252"
 TENSION = "#287bd1"
 LOAD_COLOR = "#c56a20"
 SUPPORT_COLOR = "#8195a7"
+# 내부 힘을 읽기 위한 그림용 두께입니다. 계산 단면과 별개입니다.
+BEAM_HALF_DEPTH = .8
+TOWER_BASE_DEPTH = 1.6  # 주탑 하부와 기초를 잇는 그림용 길이
 PLOT_CONFIG = {"displayModeBar": False, "responsive": True}
 
-st.set_page_config(page_title="교량 구조와 힘의 분산", page_icon="🌉", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="교량 구조와 힘의 분산", page_icon="🌉", layout="wide", initial_sidebar_state="collapsed")
 # Streamlit의 테마 변수를 사용하면 설정에서 테마를 바꾸는 즉시 반영됩니다.
 # 글자·배경을 밝은 색으로 고정하면 다크 모드에서 대비가 사라지므로 피합니다.
 st.markdown(
@@ -98,6 +111,15 @@ st.markdown(
         background: var(--secondary-background-color, transparent);
         border: 1px solid rgba(128,128,128,.28);
         border-radius: 14px; padding: 14px 18px;
+    }
+    [data-testid="stMetricLabel"] *,
+    [data-testid="stMetricValue"] * {
+        white-space: normal !important; overflow: visible !important;
+        text-overflow: clip !important; overflow-wrap: anywhere;
+    }
+    [data-testid="stMetricValue"] {
+        font-size: clamp(1.25rem, 2vw, 1.8rem);
+        line-height: 1.2;
     }
     [data-testid="stTabs"] [role="tablist"] { gap: 8px; }
     [data-testid="stTabs"] [role="tab"] {
@@ -112,6 +134,23 @@ st.markdown(
     [data-testid="stPlotlyChart"] {
         border: 1px solid rgba(128,128,128,.28); border-radius: 14px; overflow: hidden;
     }
+    /* 좁은 화면에서도 작은 보기 버튼은 그림 오른쪽에 유지합니다. */
+    .st-key-bridge_viewport [data-testid="stHorizontalBlock"] {
+        flex-wrap: nowrap !important; gap: .5rem;
+    }
+    .st-key-bridge_viewport [data-testid="stColumn"]:first-child {
+        flex: 1 1 0 !important; min-width: 0 !important;
+    }
+    .st-key-bridge_viewport [data-testid="stColumn"]:last-child {
+        flex: 0 0 44px !important; min-width: 44px !important; width: 44px !important;
+    }
+    .st-key-bridge_zoom_controls button {
+        width: 44px; height: 44px; min-height: 44px; padding: 0;
+    }
+    .st-key-bridge_zoom_controls button p { font-size: 1.25rem; }
+    .st-key-bridge_zoom_controls [data-testid="stCaptionContainer"] {
+        text-align: center;
+    }
     .bridge-card {
         margin: 14px 0; padding: 20px;
         border: 1px solid rgba(128,128,128,.28);
@@ -123,6 +162,14 @@ st.markdown(
     .bridge-card p { margin: 10px 0; line-height: 1.75; color: inherit; }
     .bridge-card p:last-child { margin-bottom: 0; }
     .bridge-card strong { font-weight: 700; }
+    .bridge-card .guide-question {
+        padding: 10px 12px; border-radius: 10px;
+        background: color-mix(in srgb, var(--bridge-accent) 12%, var(--secondary-background-color));
+    }
+    @media (max-width: 700px) {
+        .bridge-card { padding: 16px; }
+        .bridge-card p { line-height: 1.65; }
+    }
     /* 안내 화면에만 글자 크기·줄 간격을 적용합니다. */
     .st-key-lab_guide { max-width: 1080px; margin: 0 auto; }
     .st-key-lab_guide h1 {
@@ -569,20 +616,32 @@ def bridge_guide_card(kind):
     """테마에 맞는 학습 카드. 내용은 위쪽 BRIDGE_GUIDES에서 관리합니다."""
     guide = BRIDGE_GUIDES[kind]
     # HTML 특수 문자를 이스케이프해 문구를 바꿔도 카드 구조가 깨지지 않습니다.
-    title, feature, advantage, disadvantage, examples = (
-        escape(guide[field]) for field in ("title", "feature", "advantage", "disadvantage", "examples")
+    title, load_path, question, fit, disadvantage, examples = (
+        escape(guide[field]) for field in (
+            "title", "load_path", "question", "fit", "disadvantage", "examples"
+        )
     )
     st.markdown(
         f'<article class="bridge-card" data-bridge="{escape(kind)}" '
         f'style="--bridge-accent: {COLORS[kind]};">'
         f'<h4>🌉 {title}</h4>'
-        f'<p><strong>특징</strong><br>{feature}</p>'
-        f'<p><strong>장점</strong><br>{advantage}</p>'
-        f'<p><strong>단점</strong><br>{disadvantage}</p>'
-        f'<p><strong>📍 대표 사례</strong><br>{examples}</p>'
+        f'<p><strong>하중이 가는 길</strong><br>{load_path}</p>'
+        f'<p class="guide-question"><strong>🔎 그림에서 살펴보기</strong><br>{question}</p>'
+        f'<p><strong>이 상황에서 유리할 수 있는 이유</strong><br>{fit}</p>'
+        f'<p><strong>실제 건설에서의 조건과 한계</strong><br>{disadvantage} '
+        '경간, 지반, 하중, 시공 조건을 함께 살펴야 해요.'
+        f'<br><strong>사례</strong>: {examples}</p>'
         '</article>',
         unsafe_allow_html=True,
     )
+
+
+def bridge_chapter_intro(kind):
+    """상황을 먼저 제시하고, 검토할 수 있는 구조와 이유를 소개합니다."""
+    guide = BRIDGE_GUIDES[kind]
+    st.subheader("① 실제 건설 상황")
+    st.write(guide["situation"])
+    st.caption(f"이번에 탐구할 구조: {guide['title']}. 같은 상황에서도 조건에 따라 다른 구조를 선택할 수 있어요.")
 
 
 def bridge_guide_cards(kinds):
@@ -640,7 +699,7 @@ def show_planning_comparison(names):
         st.caption("현수교의 화살표는 더 긴 거리로 이어진다는 뜻이에요. 약 900 m는 긴 경간에서 비용상 유리해지는 기준이며, 짧은 현수교도 있어요.")
     with cost_column:
         scores = [BRIDGE_PLANNING[kind]["cost_index"] for kind in names]
-        fig = data_figure("건설비 경향 · 학습용 상대 비용", "비용 점수 (단순교 = 100점)", "교량 종류", 420)
+        fig = data_figure("건설비 경향 · 학습용 가정값", "비용 점수 (단순교 = 100점)", "교량 종류", 420)
         fig.add_trace(go.Bar(
             x=scores, y=names, orientation="h", marker_color=[COLORS[kind] for kind in names],
             text=[f"{score}점" for score in scores], textposition="outside", cliponaxis=False,
@@ -651,7 +710,7 @@ def show_planning_comparison(names):
         fig.update_yaxes(categoryorder="array", categoryarray=names, autorange="reversed", title=None)
         fig.update_layout(margin=dict(l=75, r=20, t=65, b=55), showlegend=False)
         chart(fig, "planning_cost_comparison")
-        st.write("구조의 복잡함과 기초·케이블 공사를 비교하기 위한 **수업용 약속 점수**예요. 실제 공사비나 실제 비용 비율은 아니에요.")
+        st.write("구조의 복잡함과 기초·케이블 공사를 비교하기 위한 **학습용 가정값**이에요. 실제 공사비나 실제 비용 비율은 아니에요.")
         st.caption("길이·폭·땅의 상태·공사 방법에 따라 실제 비용과 순서는 달라져요. 긴 거리를 건널 때는 비싼 구조라도 중간 받침을 줄여 더 경제적일 수 있어요.")
     with st.expander("참고 자료와 비용 점수의 뜻"):
         st.markdown(f"경간과 비용에 영향을 주는 요인은 [미국 FHWA 교량 형식 선택 안내서(2015), 18쪽]({PLANNING_SOURCE})를 참고했어요.")
@@ -663,67 +722,270 @@ def show_planning_comparison(names):
 
 
 # ── 3. 계산한 변위와 힘을 그대로 그림에 연결합니다 ────────────────────
-def structure_figure(sweep, count, amplify, title=None):
+def deck_half_depth(kind):
+    # 케이블교는 상판·행어·주케이블 사이 공간을 구분할 수 있게 얇게 표시합니다.
+    return .25 if kind in ("사장교", "현수교") else BEAM_HALF_DEPTH
+
+
+def member_display_points(model, member, shown):
+    points = shown[[member["i"], member["j"]]].copy()
+    if model["kind"] in ("사장교", "현수교") and member["role"] != "바닥 보":
+        # 계산 절점은 보의 중심선입니다. 그림에서는 상판 윗면에 케이블을 연결합니다.
+        points[:, 1] += deck_half_depth(model["kind"])
+    return points
+
+
+def support_display_point(model, node_id, scale):
+    x, y = model["nodes"][node_id] * scale
+    depth = deck_half_depth(model["kind"])
+    if node_id in model["deck"]:
+        y -= depth
+        if model["kind"] in ("사장교", "현수교"):
+            y -= TOWER_BASE_DEPTH
+    elif model["kind"] in ("사장교", "현수교"):
+        y += depth  # 뒤쪽 케이블의 앵커도 같은 그림 좌표에 맞춥니다.
+    return x, y
+
+
+def draw_tower_foundations(fig, model, shown, scale):
+    """상판 아래 주탑과 기초 연결을 개념도로 보완합니다. 해석 부재는 추가하지 않습니다."""
+    if model["kind"] not in ("사장교", "현수교"):
+        return
+    for e in model["members"]:
+        if e["role"] != "주탑":
+            continue
+        base = e["i"]
+        x, bottom = support_display_point(model, base, scale)
+        top = shown[base, 1] + deck_half_depth(model["kind"])
+        fig.add_trace(go.Scatter(
+            x=[x-.18, x+.18, x+.18, x-.18, x-.18], y=[bottom, bottom, top, top, bottom],
+            mode="lines", fill="toself", fillcolor="rgba(129,149,167,.38)",
+            line=dict(color=SUPPORT_COLOR, width=1.5), showlegend=False,
+            name="주탑 하부 · 기초 연결", meta=dict(illustration="tower_foundation", base_node=base),
+            hovertemplate="주탑 하부 → 기초<br>하중 전달 경로를 위한 개념 표시<extra></extra>",
+        ))
+
+
+def draw_deck_beam(fig, xs, ys, name, bending=False, left_end=False, right_end=False, outline=SUPPORT_COLOR, depth=BEAM_HALF_DEPTH):
+    """계산된 중심선을 따라 긴 사각형 보의 윗부분·아랫부분을 채웁니다."""
+    xs, ys = np.asarray(xs), np.asarray(ys)
+    for upper in (True, False):
+        edge = ys + (depth if upper else -depth)
+        region = "윗부분 · 압축" if upper else "아랫부분 · 인장"
+        fill = ("rgba(224,82,82,.32)" if upper else "rgba(40,123,209,.32)") if bending else "rgba(129,149,167,.30)"
+        fig.add_trace(go.Scatter(
+            x=list(xs) + list(xs[::-1]), y=list(ys) + list(edge[::-1]),
+            mode="lines", line=dict(width=0), fill="toself", fillcolor=fill,
+            name=f"{name} · {region}" if bending else name,
+            hovertemplate=(f"{name}<br>{region}" if bending else name) + "<extra></extra>",
+            showlegend=False,
+        ))
+    line(fig, xs, ys + depth, outline, 1.8)
+    line(fig, xs, ys - depth, outline, 1.8)
+    line(fig, xs, ys, SUPPORT_COLOR, 1., dash="dot")
+    for end, show in ((0, left_end), (-1, right_end)):
+        if show:
+            line(fig, [xs[end], xs[end]], [ys[end] - depth, ys[end] + depth], outline, 1.8)
+
+
+def force_arrow_pair(fig, center, direction, tension, length, name):
+    """인장은 바깥쪽, 압축은 중심 쪽을 향하는 두 화살표로 표시합니다."""
+    center, direction = np.asarray(center), np.asarray(direction)
+    for side in (-1, 1):
+        inner = center + side * length * .18 * direction
+        outer = center + side * length * .5 * direction
+        start, end = (inner, outer) if tension else (outer, inner)
+        fig.add_annotation(
+            name=f"{name}_{side}", ax=float(start[0]), ay=float(start[1]),
+            x=float(end[0]), y=float(end[1]), axref="x", ayref="y", xref="x", yref="y",
+            text="", showarrow=True, arrowhead=3, arrowsize=1.1, arrowwidth=2.5,
+            arrowcolor=TENSION if tension else COMPRESSION,
+        )
+
+
+def add_member_force_arrows(fig, model, result, shown, scale, within, amplify):
+    """대표 부재의 힘을 계산 부호에 맞춘 화살표로 표시합니다."""
+    if not result["stable"]:
+        return
+    # (부재 역할, 경간 내 위치, 글상자의 가로·세로 간격, 축력 부호 필터)
+    specs = {
+        "단순교": [("바닥 보", .5, -45, -65, 0)],
+        "아치교": [("바닥 보", .6, 35, -65, 0), ("아치", .3, -55, 55, 0),
+                  ("세로 지지대", .75, 55, 35, 0)],
+        "트러스교": [("바닥 보", .5, 0, -65, 0), (None, .7, 50, 60, 1),
+                    (None, .3, -50, 35, -1)],
+        "사장교": [("바닥 보", .5, 0, 65, 0), ("사장 케이블", .3, 40, -55, 0),
+                  ("주탑", 0., -55, 25, 0)],
+        "현수교": [("바닥 보", .5, 0, 65, 0), ("주케이블", .4, -25, -65, 0),
+                  ("수직 매다는 줄", .75, 55, 20, 0), ("주탑", 0., -55, 25, 0)],
+    }[model["kind"]]
+    used = set()
+    for role, fraction, offset_x, offset_y, sign in specs:
+        candidates = [i for i, e in enumerate(model["members"])
+                      if i not in used and (e["role"] == role if role else e["form"] == "rod")
+                      and (sign == 0 or sign * result["axial"][i] > 1e-7)]
+        # 자중·추가 모두 없을 때도 대표 막대의 위치와 무하중 상태를 알려 줍니다.
+        if not candidates and role is None:
+            fallback = "아래 가로 막대" if sign > 0 else "대각선 보강재"
+            candidates = [i for i, e in enumerate(model["members"]) if e["role"] == fallback and i not in used]
+        if not candidates:
+            continue
+        index = min(candidates, key=lambda i: abs(
+            (model["nodes"][model["members"][i]["i"], 0]
+             + model["nodes"][model["members"][i]["j"], 0]) / 2 / model["span"] - fraction))
+        used.add(index)
+        e = model["members"][index]
+        axial, moment = result["axial"][index], result["moments"][index]
+        color = TENSION if axial > 1e-7 else COMPRESSION if axial < -1e-7 else "#7160d2" if moment > 1e-9 else SUPPORT_COLOR
+        member_name = {"바닥 보": "상판 아래 보", "수직 매다는 줄": "행어(세로줄)"}.get(e["role"], e["role"])
+        text = member_name + (" · 휨" if moment > 1e-9 else "")
+        if abs(axial) <= 1e-7 and moment <= 1e-9:
+            text += "<br>힘 거의 없음"
+        endpoints = member_display_points(model, e, shown)
+        x, y = endpoints.mean(axis=0)
+        if e["role"] == "바닥 보" and within:
+            original_x = (model["nodes"][e["i"], 0] + model["nodes"][e["j"], 0]) / 2
+            sample = min(result["deck_samples"], key=lambda p: abs(p[0] - original_x))
+            # 구조 그림에서 사용하는 보간 곡선 위에 안내선을 연결합니다.
+            x, y = (sample[0] + amplify * sample[1]) * scale, sample[2] * scale * amplify
+        direction = endpoints[1] - endpoints[0]
+        member_length = float(np.linalg.norm(direction))
+        direction = direction / member_length
+        perpendicular = np.array([-direction[1], direction[0]])
+        if abs(axial) > 1e-7:
+            offset = deck_half_depth(model["kind"]) / 2 if e["role"] == "바닥 보" else .4
+            force_arrow_pair(fig, np.array([x, y]) + offset * perpendicular, direction,
+                             axial > 0, min(2.2, max(1.8, member_length * .8)), f"member_axial_{index}")
+        if model["kind"] == "단순교" and moment > 1e-9:
+            force_arrow_pair(fig, [x, y + BEAM_HALF_DEPTH / 2], [1., 0.], False, 1.8, f"member_bending_{index}_upper")
+            force_arrow_pair(fig, [x, y - BEAM_HALF_DEPTH / 2], [1., 0.], True, 1.8, f"member_bending_{index}_lower")
+        fig.add_annotation(
+            name=f"member_name_{index}", x=float(x), y=float(y), xref="x", yref="y",
+            ax=offset_x, ay=offset_y, axref="pixel", ayref="pixel", text=text,
+            showarrow=True, arrowhead=0, arrowwidth=1.2, arrowcolor=color,
+            bgcolor="rgba(255,255,255,.96)", bordercolor=color, borderwidth=1, borderpad=4,
+            font=dict(size=11, color="#1f2937"), align="center",
+        )
+
+
+def structure_figure(sweep, count, amplify, title=None, show_forces=False):
     model, r = sweep["model"], sweep["results"][count]
     xy = model["nodes"]
     L, scale = model["span"], 12/model["span"]
     kind = model["kind"]
+    depth = deck_half_depth(kind)
     fig = base_figure(title or f"{kind} · 추 {count}개", [-5.2, 17.2], model["view_y"], 410)
     fig.update_yaxes(scaleanchor="x", scaleratio=1)
+    if kind in ("사장교", "현수교"):
+        fig.update_xaxes(showgrid=False)
+        fig.update_yaxes(showgrid=False)
     within = r["stable"] and r["utilization"] <= 1+1e-9
-    u = r["u"].reshape(-1, 3)[:, :2] if within else np.zeros_like(xy)
+    # 기준을 넘으면 마지막 기준 이내 상태를 유지합니다. 붕괴 후 해석은 하지 않습니다.
+    display_count = count if within else next(
+        (i for i in range(count, -1, -1) if sweep["results"][i]["stable"]
+         and sweep["results"][i]["utilization"] <= 1+1e-9), None)
+    has_valid_shape = display_count is not None
+    if display_count is None:
+        display_count = next((i for i in range(count + 1) if sweep["results"][i]["stable"]), None)
+    display_r = sweep["results"][display_count] if display_count is not None else r
+    shape_available = display_r["stable"]
+    fig.update_layout(meta=dict(display_count=display_count, requested_count=count, frozen=not within))
+    u = display_r["u"].reshape(-1, 3)[:, :2] if shape_available else np.zeros_like(xy)
     shown = (xy+amplify*u)*scale
+    draw_tower_foundations(fig, model, shown, scale)
     for index, e in enumerate(model["members"]):
         a, b = e["i"], e["j"]
-        N = r["axial"][index] if r["stable"] else 0.
+        N = display_r["axial"][index] if shape_available else 0.
         color = TENSION if N > 1e-7 else COMPRESSION if N < -1e-7 else SUPPORT_COLOR
         force_name = "인장" if N > 1e-7 else "압축" if N < -1e-7 else "축력 거의 없음"
-        width = (4.8 if e["role"] == "대각선 보강재" else 3.) + min(abs(N), 10)*.22
+        base_width = 6. if e["form"] == "beam" else 4.8 if e["role"] == "대각선 보강재" else 3.
+        width = base_width + min(abs(N), 10)*.22
         if e["form"] == "cable":
             color = TENSION if N > 1e-7 else SUPPORT_COLOR
-        if within and amplify > 0:
-            line(fig, xy[[a, b], 0]*scale, xy[[a, b], 1]*scale, "rgba(128,128,128,.3)", 1)
-        if e["role"] == "바닥 보" and within:
-            ps = [p for p in r["deck_samples"] if xy[a, 0]-1e-10 <= p[0] <= xy[b, 0]+1e-10]
+        if shape_available and amplify > 0:
+            original = member_display_points(model, e, xy * scale)
+            line(fig, original[:, 0], original[:, 1], "rgba(128,128,128,.3)", 1)
+        if e["role"] == "바닥 보" and shape_available:
+            ps = [p for p in display_r["deck_samples"] if xy[a, 0]-1e-10 <= p[0] <= xy[b, 0]+1e-10]
             xs = [(p[0]+amplify*p[1])*scale for p in ps]
             ys = [amplify*p[2]*scale for p in ps]
         else:
-            xs, ys = shown[[a, b], 0], shown[[a, b], 1]
-        moment = r["moments"][index] if r["stable"] else 0.
-        line(fig, xs, ys, color, width, name=f"{e['role']} · 양옆 합계 {force_name} {abs(N):.3f} N · 휨 {moment:.4f} N·m")
-        if kind == "단순교" and e["role"] == "바닥 보" and moment > 1e-9:
-            line(fig, xs, np.array(ys)+.055, COMPRESSION, 1.5, name="보 윗면 · 휨에 의한 압축")
-            line(fig, xs, np.array(ys)-.055, TENSION, 1.5, name="보 아랫면 · 휨에 의한 인장")
+            endpoints = member_display_points(model, e, shown)
+            xs, ys = endpoints[:, 0], endpoints[:, 1]
+        moment = display_r["moments"][index] if shape_available else 0.
+        name = f"{e['role']} · 양옆 합계 {force_name} {abs(N):.3f} N · 휨 {moment:.4f} N·m"
+        if e["role"] == "바닥 보":
+            draw_deck_beam(fig, xs, ys, name, bending=kind == "단순교" and moment > 1e-9,
+                           left_end=a == model["deck"][0], right_end=b == model["deck"][-1], outline=color, depth=depth)
+        else:
+            line(fig, xs, ys, color, width, name=name)
     for node_id in sorted(set(i//3 for i in model["fixed"] if i % 3 == 1)):
-        x, y = xy[node_id]*scale
+        x, y = support_display_point(model, node_id, scale)
         support(fig, x, y, roller=3*node_id not in model["fixed"], depth=.65, half_width=.28)
-    if r["stable"]:
+    if shape_available:
         for dof in model["fixed"]:
-            value = r["reactions"][dof]
+            value = display_r["reactions"][dof]
             if abs(value) < 1e-7 or dof % 3 == 2:
                 continue
-            x, y = xy[dof//3]*scale
+            x, y = support_display_point(model, dof//3, scale)
             distance = math.copysign(min(1.7, abs(value)*.35), value)
             end = (x+distance, y) if dof % 3 == 0 else (x, y+distance)
             arrow(fig, (x, y), end, SUPPORT_COLOR, abs(value), f"{abs(value):.2f} N")
-    if within:
-        samples = np.array(r["deck_samples"])
+    if shape_available:
+        samples = np.array(display_r["deck_samples"])
         order = np.argsort(samples[:, 0])
         samples = samples[order]
-        y_at = lambda x: float(np.interp(x/scale, samples[:, 0], samples[:, 2]))*amplify*scale
+        y_at = lambda x: float(np.interp(x/scale, samples[:, 0], samples[:, 2]))*amplify*scale + depth
     else:
-        y_at = lambda x: 0.
+        y_at = lambda x: depth
     live_force = count*model["weight_mass"]*GRAVITY
     draw_weights(fig, count, y_at, weight_positions(count, 1., 11.),
                  arrow_size=1.2+min(live_force, 5)*.2, block_width=.55, total_force=live_force)
-    if not r["stable"]:
+    if show_forces:
+        add_member_force_arrows(fig, model, display_r, shown, scale, shape_available, amplify)
+        fig.add_annotation(
+            name="force_legend", x=.5, y=1.12, xref="paper", yref="paper", yanchor="bottom",
+            text=f'<span style="color:{COMPRESSION}">→ ← 압축: 안으로 누름</span><br>'
+                 f'<span style="color:{TENSION}">← → 인장: 밖으로 당김</span>',
+            showarrow=False, font=dict(size=11, color="#1f2937"),
+            bgcolor="rgba(255,255,255,.96)", borderpad=4,
+        )
+    if not within and has_valid_shape:
+        label(fig, 6, 8.4, f"기준 초과 · 추 {display_count}개 형상·부재력 유지<br>추는 현재 {count}개 · 붕괴 후 예측 아님")
+    elif not within and shape_available:
+        label(fig, 6, 8.4, f"처음부터 기준 초과 · {display_count}개 참고 형상 유지<br>추는 현재 {count}개 · 붕괴 후 예측 아님")
+    elif not r["stable"]:
         label(fig, 6, 7.8, "연결 각도가 자유로워 형태를 유지하지 못해요.<br>수치 대신 원래 뼈대를 표시합니다.")
-    elif not within:
-        label(fig, 6, 8.4, "계산 기준 초과 · 원래 모양 표시<br>붕괴 후 모양은 예측하지 않습니다.")
     else:
-        label(fig, 6, 9., f"최대 처짐 {r['deflection_mm']:.2f} mm · 변형 {amplify}배 확대")
+        label(fig, 6, 9., f"최대 처짐 {r['deflection_mm']:.4f} mm · 변형 {amplify}배 확대")
     label(fig, 6, model["view_y"][0]+.5, f"받침 사이 {L*100:.0f} cm · 두 옆면의 힘을 합친 그림")
     return fig
+
+
+def experiment_figure(sweep, count, amplify, zoom):
+    """실험 화면의 카메라만 확대합니다. 부재 좌표와 계산값은 그대로 둡니다."""
+    fig = structure_figure(sweep, count, amplify, show_forces=True)
+    ys = [float(y) for trace in fig.data for y in trace.y if y is not None]
+    bottom, top = min(ys) - 2., max(ys) + 4.
+    if sweep["model"]["kind"] in ("사장교", "현수교"):
+        deck_top = max(float(y) for trace in fig.data if (trace.name or "").startswith("바닥 보") for y in trace.y)
+        bottom, top = min(ys) - 1.5, max(max(ys) + 1.25, deck_top + 3.5)
+    center_y = (bottom + top) / 2
+    half_y = max(8., top - bottom) / (2 * zoom)
+    half_x = 11.2 / zoom
+    fig.update_layout(height=560, dragmode="pan", margin=dict(t=110, b=40),
+                      title=dict(y=.99, yanchor="top"))
+    fig.update_xaxes(range=[6 - half_x, 6 + half_x], fixedrange=False)
+    fig.update_yaxes(range=[center_y - half_y, center_y + half_y], fixedrange=False)
+    # 상태와 경간 안내는 카메라 확대에도 화면 가장자리에 남겨 둡니다.
+    fig.layout.annotations[-2].update(x=.5, y=1.02, xref="paper", yref="paper", yanchor="bottom")
+    fig.layout.annotations[-1].update(x=.5, y=-.02, xref="paper", yref="paper", yanchor="top")
+    return fig
+
+
+def change_bridge_zoom(step):
+    current = st.session_state.get("bridge_zoom_percent", 100)
+    st.session_state["bridge_zoom_percent"] = 100 if step == 0 else max(50, min(250, current + step))
 
 
 def overview_figure(sweeps, amplify):
@@ -754,22 +1016,91 @@ def overview_figure(sweeps, amplify):
     return fig
 
 
-def show_result(sweep, count, amplify, key):
+def force_observation(sweep, count):
+    """현재 해석에서 확인된 힘만 학생용 문장으로 설명합니다."""
+    r, model = sweep["results"][count], sweep["model"]
+    if not r["stable"]:
+        return "현재 설정에서는 구조의 평형을 계산할 수 없어요. 심화 설정에서 연결과 보강 조건을 살펴보세요."
+    if max([abs(n) for n in r["axial"]] + r["moments"], default=0.) < 1e-9:
+        return "현재 계산에서는 부재에 작용하는 힘이 거의 없어요. 추를 올려 변화를 살펴보세요."
+    kind, members = model["kind"], model["members"]
+    if kind == "단순교":
+        return "상판 아래 보에 휨이 생겨요. 이 하중 조건에서 보의 윗부분은 압축, 아랫부분은 인장을 받아요."
+    if kind == "아치교":
+        compressed = any(r["axial"][i] < -1e-7 for i, e in enumerate(members) if e["role"] == "아치")
+        return ("아치 부재에 압축력이 계산됐어요. 아치와 받침을 따라 힘이 전달되는 길을 찾아보세요."
+                if compressed else "현재 설정의 아치 부재 색과 상판 보의 휨을 살펴보세요.")
+    if kind == "트러스교":
+        forces = [r["axial"][i] for i, e in enumerate(members) if e["form"] == "rod"]
+        if any(n > 1e-7 for n in forces) and any(n < -1e-7 for n in forces):
+            return "트러스의 일부 막대는 인장, 다른 막대는 압축을 받아요. 상판 보는 휨도 받아요."
+        return "현재 설정에서 막대의 인장·압축 색과 상판 보의 휨을 살펴보세요."
+    if r["tension"] > 1e-7:
+        return ("사장 케이블이 인장력으로 상판을 직접 지지해요. 힘은 주탑과 앵커로 전달돼요."
+                if kind == "사장교" else "행어(세로줄)와 주케이블이 인장력으로 상판을 매달아요. 힘은 주탑과 앵커로 전달돼요.")
+    return "현재 계산에서 케이블 장력은 거의 없어요. 상판 보와 받침의 힘도 함께 살펴보세요."
+
+
+def load_change_observation(sweep, count, previous_count):
+    """같은 모형의 두 계산 결과를 비교하며, 변화 방향을 미리 가정하지 않습니다."""
+    if previous_count is None or previous_count == count:
+        return None
+    before, after = (sweep["results"][i] for i in (previous_count, count))
+    if not before["stable"] or not after["stable"]:
+        return "변경 전후 중 평형을 계산하지 못한 상태가 있어 처짐을 비교할 수 없어요."
+    delta = after["deflection_mm"] - before["deflection_mm"]
+    change = "커졌어요" if delta > 1e-9 else "작아졌어요" if delta < -1e-9 else "거의 같아요"
+    return (f"같은 구조·설정에서 추 {previous_count}개 → {count}개: "
+            f"계산된 최대 처짐이 {before['deflection_mm']:.4f} → {after['deflection_mm']:.4f} mm로 {change}. "
+            "표시 자릿수보다 작은 차이는 숫자가 같아 보일 수 있어요.")
+
+
+def show_result(sweep, count, amplify, key, figure_slot=None, previous_count=None, view_zoom=None):
     kind, r = sweep["model"]["kind"], sweep["results"][count]
+    fig = (structure_figure(sweep, count, amplify) if view_zoom is None
+           else experiment_figure(sweep, count, amplify, view_zoom))
+    if figure_slot is None:
+        chart(fig, key)
+    else:
+        with figure_slot:
+            chart(fig, key)
+    st.markdown("**구조적 반응 관찰**")
     if not r["stable"]:
         st.warning("형태 불안정 · 대각선이나 받침으로 움직임을 막아야 해요.")
     elif r["utilization"] > 1+1e-9:
         st.error(f"계산 기준 초과 · 먼저 확인할 곳: {r['governing']}")
     else:
         st.success(f"현재 계산 기준 이내 · 가장 여유가 작은 곳: {r['governing']}")
-    chart(structure_figure(sweep, count, amplify), key)
-    cols = st.columns(3)
-    cols[0].metric("추 0~20개 중 기준 이내", capacity_text(sweep))
-    cols[1].metric("최대 처짐", "계산 불가" if not r["stable"] else f"{r['deflection_mm']:.2f} mm")
-    cols[2].metric("기준 대비 여유", "계산 불가" if not r["stable"] else "힘 없음" if r["reserve"] is None else f"{r['reserve']:.2f}배")
+    st.metric("현재 계산된 최대 처짐", "계산 불가" if not r["stable"] else f"{r['deflection_mm']:.4f} mm")
+    change = load_change_observation(sweep, count, previous_count)
+    if change:
+        st.info(change)
+    st.write(force_observation(sweep, count))
+    st.caption(f"빨강: 압축 · 파랑: 인장 · 회색: 받침 또는 축력이 거의 없는 부재. 사각형 보의 두께는 내부 힘을 보기 위한 표현이에요. "
+               f"그림의 변형은 {amplify}배로 표시하며, mm 수치는 실제 계산값이에요. 0배는 원래 모양이에요.")
+    if view_zoom is not None:
+        st.caption("부재 옆의 화살표는 방향으로 힘의 종류를 나타내요. 안으로 모이면 압축, 밖으로 벌어지면 인장이에요. 화살표 길이는 힘의 크기를 나타내지 않아요.")
+    if fig.layout.meta["frozen"] and fig.layout.meta["display_count"] is not None:
+        st.warning(f"그림의 변형·부재력은 추 {fig.layout.meta['display_count']}개 상태에서 멈춰 있어요. "
+                   f"추와 주황 하중 화살표는 현재 {count}개를 표시해요. 처짐 수치는 현재 조건의 참고 계산값이에요.")
     m = sweep["model"]
-    st.caption(f"골조 {m['skeleton_mass']*1000:.1f} g · 줄 {m['cable_mass']*1000:.1f} g · 종이 {m['paper_mass']*1000:.1f} g. "
-               f"막대 한 개 단면 {m['section_mm'][0]:.1f} × {m['section_mm'][1]:.1f} mm. 받침·접착제 무게는 제외합니다.")
+    load_mass_g = m["weight_mass"]*1000
+    load_description = (
+        f"추 {count}개 × {load_mass_g:g} g의 하중을 상판에 균등하게 나누어 싣는 모형입니다."
+        if count else "추 하중은 없고, 설정에 따라 다리 자체 무게만 작용하는 모형입니다."
+    )
+    with st.expander("심화 결과 · 실험 범위와 모형 정보"):
+        st.metric("기준 대비 여유", "계산 불가" if not r["stable"] else "힘 없음" if r["reserve"] is None else f"{r['reserve']:.2f}배")
+        st.caption(load_description)
+        st.write(f"0~20개 실험에서 기준 이내인 추: **{capacity_text(sweep)}**. 이 값만으로 실제 교량의 우열은 정할 수 없습니다.")
+        if sweep["capacity"] >= 0:
+            limit_force = sweep["capacity"] * m["weight_mass"] * GRAVITY
+            qualifier = " 이상 (실험 범위에서 한계에 닿지 않음)" if sweep["censored"] else ""
+            st.write(f"마지막 기준 이내 추의 추가 하중: **{limit_force:.3f} N{qualifier}** (자중 제외).")
+        if r["stable"]:
+            st.write(f"현재 총 수직 하중(자중 포함 설정 반영): {r['total_force']:.3f} N · 가장 큰 케이블 장력: {r['tension']:.3f} N")
+        st.caption(f"골조 {m['skeleton_mass']*1000:.1f} g · 줄 {m['cable_mass']*1000:.1f} g · 종이 {m['paper_mass']*1000:.1f} g. "
+                   f"막대 한 개 단면 {m['section_mm'][0]:.1f} × {m['section_mm'][1]:.1f} mm. 받침·접착제 무게는 제외합니다.")
     if r["stable"] and r["utilization"] > 1:
         st.caption("처짐 숫자는 선형식의 참고 계산값입니다. 기준을 넘은 뒤 실제로 버티는지나 붕괴 모양을 뜻하지 않아요.")
 
@@ -799,21 +1130,22 @@ def load_curve(sweeps, names, count):
     return fig
 
 
-# ── 4. 공통 조건과 왼쪽 하중 조절 ──────────────────────────────────────
+# ── 4. 심화 설정 ─────────────────────────────────────────────────────
 with st.sidebar:
-    st.header("⚖️ 하중 조절")
-    load = st.slider("추 개수", 0, 20, 0, key="load", format="%d개")
-    mass_g = st.select_slider("추 한 개의 무게", options=[10, 20, 50, 100], value=20, format_func=lambda x: f"{x} g", key="weight_mass_g")
-    st.metric("추로 더한 무게", f"{load*mass_g} g", f"아래로 누르는 힘 {load*mass_g/1000*GRAVITY:.2f} N", delta_color="off")
-    st.caption("0개에서도 다리 자체 무게는 남아요. 오른쪽 모형·그래프에 모두 반영됩니다.")
-    st.divider()
-    st.markdown("**같은 조건으로 실험하기**")
-    span_cm = st.slider("받침 사이 거리 (cm)", 30, 100, 60, 5, key="span_cm")
-    comparison_basis = st.radio("재료 비교 기준", ["골조 재료량 같게", "막대 굵기 같게"], key="material_basis",
-                                help="재료량 같게: 골조 전체 부피를 단순교와 맞추므로 막대가 많은 구조는 개별 막대가 가늘어집니다. 케이블·종이·받침은 별도입니다.")
-    material = st.selectbox("골조 재료 · 예시 물성", list(MATERIALS), key="material")
-    preset = MATERIALS[material]
-    with st.expander("부재·재료·받침 조건 바꾸기"):
+    with st.expander("⚙️ 심화 설정", expanded=False):
+        st.markdown("**비교 조건**")
+        span_cm = st.slider("받침 사이 거리 (cm)", 30, 100, 60, 5, key="span_cm")
+        comparison_basis = st.radio(
+            "재료 비교 기준", ["골조 재료량 같게", "막대 굵기 같게"], key="material_basis",
+            help="재료량 같게: 골조 전체 부피를 단순교와 맞추므로 막대가 많은 구조는 개별 막대가 가늘어집니다. 케이블·종이·받침은 별도입니다.",
+        )
+        material = st.selectbox("골조 재료 · 예시 물성", list(MATERIALS), key="material")
+        preset = MATERIALS[material]
+        mass_g = st.select_slider(
+            "추 한 개의 무게", options=[10, 20, 50, 100], value=20,
+            format_func=lambda x: f"{x} g", key="weight_mass_g",
+        )
+        st.caption("기본 실험은 추 한 개 20 g을 사용합니다.")
         st.caption("균질한 막대 두 옆면 + 종이 바닥판을 계산해요. 아래 값은 특정 제품을 측정한 수치가 아니에요.")
         member_width = st.slider("기준 막대 폭 (mm)", 4., 20., 8., .5, key="member_width")
         member_depth = st.slider("기준 막대 세로 두께 (mm)", 2., 12., 6., .5, key="member_depth")
@@ -833,32 +1165,43 @@ with st.sidebar:
                                    format_func=lambda x: f"1/{x}", key="deflection_divisor")
         self_weight = st.toggle("다리 자체 무게 반영", True, key="self_weight")
         st.caption("처짐 기준과 연결·받침 허용 힘은 실험 조건입니다. 실제 설계 기준을 인증하는 값은 아니에요.")
-    amplify = st.slider("그림의 변형 확대 배율", 0, 30, 10, key="amplify", format="%d배",
-                        help="그림만 확대합니다. mm 수치·힘·한계 개수는 변하지 않습니다. 0배는 원래 모양입니다.")
-    st.caption("밝은/다크 모드: 오른쪽 위 ⋮ → Settings → Theme")
-    with st.expander("선생님용 · 모형의 약속과 코드 수정 안내"):
+        st.markdown("**교량 형상**")
+        arch_percent = st.slider("아치 높이 · 받침 사이 거리의 (%)", 10, 40, 25, 5, key="arch_percent")
+        panels = st.slider("트러스 사각형 칸 수", 1, 11, 5, key="triangles")
+        truss_percent = st.slider("트러스 뼈대 높이 · 경간의 (%)", 10, 35, 20, 5, key="truss_percent")
+        reinforced = st.toggle("트러스 대각선 보강재 추가", True, key="add_diagonals")
+        tower_cm = st.slider("케이블교 바닥판 위 주탑 높이 (cm)", 5, 50, 15, 1, key="tower_cm")
+        sag_percent = st.slider("현수교 주케이블 늘어진 깊이 · 주탑 높이의 (%)", 20, 80, 50, 5, key="sag_percent")
+        st.markdown("**그림**")
+        amplify = st.slider(
+            "변형 확대 배율", 0, 30, 10, key="amplify", format="%d배",
+            help="그림만 확대합니다. mm 수치·힘·한계 개수는 변하지 않습니다. 0배는 원래 모양입니다.",
+        )
+        st.caption("밝은/다크 모드: 오른쪽 위 ⋮ → Settings → Theme")
+    with st.expander("교사용 · 모형의 약속", expanded=False):
         st.write("고정된 교량별 최대 추 개수는 없습니다. 같은 단위(m, N, Pa)로 보·막대·줄의 힘과 처짐을 구하고, 강도·Euler 좌굴·막대 끝 연결력·수평 받침력·허용 처짐 중 먼저 닿는 기준을 찾습니다.")
         st.write("연속된 바닥 보와 아치는 휨을 받는 보 요소, 나머지 막대는 핀 연결 축력 요소입니다. 줄은 당기는 힘만 허용합니다. 두 옆면이 무게를 절반씩 나누며 가로 방향 흔들림은 별도 가새가 막는다고 가정합니다.")
         st.write("골조 단면은 직사각형입니다. 수수깡·종이의 속 빈 단면, 접힌 종이의 강성, 접착제 특성은 별도 실측 보정이 필요합니다. 종이는 하중 분배와 자중만 반영하고 골조의 휨 강성에 더하지 않습니다.")
         st.write("아치는 양끝 핀 지지, 보의 오른쪽은 수평 이동 가능한 받침입니다. 케이블 교량은 주탑 뒤 고정줄과 앵커를 포함합니다. 압축 막대는 양끝 힌지의 Euler 하중, 아치의 유효 길이는 아치 길이의 절반으로 가정합니다. 바닥 보의 압축 유효 길이는 전체 경간(트러스는 한 칸)입니다. 실제 좌굴 형상·유효 길이는 지지 조건에 따라 달라집니다.")
         st.write("작은 변형의 2차원 선형 정적 계산입니다. 초기 케이블 장력·형상 찾기, 대변형, 아치 전체의 비선형 불안정, 3차원 비틀림, 전단 파괴, 바람·지진·피로, 연결부의 회전·박리는 계산하지 않습니다. 케이블의 큰 형상 변화가 예상되면 이 결과의 적용 범위를 벗어납니다.")
+        st.write("트러스는 삼각형 부재가 축력으로 힘을 나누고, 모형에서 바닥 보의 좌굴 길이를 한 칸으로 두어 높은 결과가 나올 수 있습니다. 골조 재료량 비교에는 케이블 재료가 포함되지 않고 좌굴·연결 조건도 단순화되어 있어 실제 교량의 우열을 뜻하지 않습니다.")
         st.write("‘기준 대비 여유’는 각 기준의 허용량 ÷ 계산된 요구량 중 가장 작은 값입니다. 강도만의 안전율이나 인증된 설계 안전율은 아닙니다. 자중 때문에 추 개수의 단순 비율과 다를 수 있습니다.")
         st.write("MATERIALS는 예시 물성, build_model()은 모형과 지지 조건, solve_sweep()은 계산과 기준 검사입니다. 하나의 파일 안에서 수정할 수 있습니다.")
         st.markdown(f"계산 참고: [TU Delft 보 요소]({METHOD_SOURCE}) · [TU Delft 평면 골조](https://teachbooks.tudelft.nl/computational-modelling/structural_linear/space_frame.html) · [MIT 압축 부재 좌굴]({BUCKLING_SOURCE})")
 
 # ── 5. 첫 화면 안내, 그 다음 탐구 ──────────────────────────────────────
-guide_tab, lab_tab = st.tabs(["📖 실험실 안내", "🌉 교량 탐구"])
+guide_tab, lab_tab, comparison_tab = st.tabs(["📖 실험실 안내", "🌉 교량 탐구", "🔎 교량 비교"])
 with guide_tab:
     with st.container(key="lab_guide"):
         st.title("🌉 교량 구조와 힘의 분산")
         st.markdown('<p class="guide-subtitle">개념 원리 탐구 실험실</p>', unsafe_allow_html=True)
-        st.write("추를 올리고, 막대의 굵기와 받침 사이 거리를 바꾸며 다리가 힘을 전달하는 방법을 관찰해요.")
+        st.write("추를 올리면서 교량이 하중을 어떻게 전달하고 견디는지 관찰해 보자.")
         st.info("안내를 읽었다면 위의 ‘🌉 교량 탐구’ 탭에서 시작하세요.", icon="👉")
         st.subheader("1. 이렇게 탐구해요")
         for col, (title, text) in zip(st.columns(3), [
-            ("① 조건 맞추기", "왼쪽에서 거리와 재료를 고르세요. 기본은 골조 재료의 총량을 같게 맞춘 비교예요."),
-            ("② 추 올리기", "추 0~20개를 올리며 처짐(mm)과 힘을 관찰하세요. 다리 자체 무게도 포함해요."),
-            ("③ 한 가지씩 바꾸기", "막대를 두껍게 하거나 대각선을 넣어 보세요. 어떤 조건에서 유리해지는지 비교해요."),
+            ("① 건설 상황 살펴보기", "본문에서 상황과 교량 그림을 보고, 추를 올리면 힘이 어디로 전달될지 예상해요."),
+            ("② 추 올리기", "본문에서 현재 교량의 허용 개수까지 추를 올리고 처짐(mm)과 힘의 변화를 살펴봐요. 실험 범위는 최대 20개예요."),
+            ("③ 원리와 실제 적용 연결하기", "하중이 가는 길과 인장·압축·휨을 설명하고, 실제 건설에서 유리한 이유와 한계를 생각해요."),
         ]):
             with col, st.container(border=True):
                 st.markdown(f"**{title}**")
@@ -875,7 +1218,7 @@ with guide_tab:
                 with col, st.container(border=True):
                     st.markdown(f"**{title}**")
                     st.write(text)
-        st.write("그림 속 변형은 보기 쉽게 **확대**해요. 실제 계산된 처짐은 **mm** 숫자로 비교하세요. 선 굵기는 힘의 크기 표시이며 실제 막대 두께가 아니에요.")
+        st.write("그림 속 변형은 보기 쉽게 **확대**해요. 실제 계산된 처짐은 **mm** 숫자로 비교하세요. 보는 내부를 볼 수 있도록 긴 사각형 띠로 그려요. 띠의 두께는 실제 단면 두께가 아니에요.")
         st.table([
             {"용어": "처짐", "쉬운 뜻": "보가 아래로 휘는 거리예요. 1 mm는 1 cm의 10분의 1이에요."},
             {"용어": "장력", "쉬운 뜻": "줄을 팽팽하게 당기는 힘이에요. N(뉴턴)으로 나타내요."},
@@ -886,30 +1229,21 @@ with guide_tab:
         with st.container(border=True):
             st.write("**교량마다 정해 둔 ‘최대 추 개수’는 없어요.** 거리·단면·재료·줄·받침 조건에서 계산해요. ‘항상 가장 튼튼한 교량’이라는 순위도 없어요.")
             st.write("기본은 **교실 크기의 균질 막대 모형**이에요. 재료 성질은 예시이므로 실제 수수깡·접힌 종이의 결과와는 차이가 있어요. 선생님이 측정값으로 보정할 수 있어요.")
+            st.write("시뮬레이션에서 확인할 수 있는 것은 설정한 조건에서의 처짐과 힘의 분담이에요. 실제 교량의 지반·시공·유지관리 조건은 이 모형으로 검증하지 않아요.")
             st.write("0~20개 안에서 처음 기준을 넘는 직전 개수를 표시해요. 20개도 기준 이내이면 **‘20개 이상’**으로 표시해요. 아직 진짜 한계를 찾은 것은 아니에요.")
-            st.write("기준을 넘은 경우에는 원래 모양을 보여 줘요. 실제 붕괴 과정과 바람·지진은 이 실험에 포함하지 않아요.")
+            st.write("추 조절기는 선택한 교량의 계산된 허용 개수까지만 움직여요. 교량이나 설정을 바꿔 한계가 낮아지면 추도 그 범위로 줄여요.")
+            st.write("기준을 넘으면 마지막 기준 이내의 변형과 부재력을 유지해요. 처음부터 기준을 넘으면 처음 계산된 참고 형상을 보여 줘요. 실제 붕괴 과정과 바람·지진은 이 실험에 포함하지 않아요.")
 
 with lab_tab:
-    tab_beam, tab_truss, tab_cable, tab_dashboard = st.tabs([
-        "01  보와 아치", "02  삼각형과 트러스", "03  케이블과 주탑", "04  5대 교량 비교",
-    ])
-    # 먼저 조작기를 모두 만들고, 그 값을 한 가지 cfg에 모아 모든 탭에 전달합니다.
-    with tab_beam:
-        st.subheader("보는 휘고, 아치는 받침을 옆으로 밀어요")
-        arch_percent = st.slider("아치 높이 · 받침 사이 거리의 (%)", 10, 40, 25, 5, key="arch_percent")
-    with tab_truss:
-        st.subheader("같은 사각형 틀에 대각선을 넣으면?")
-        cols = st.columns(3)
-        panels = cols[0].slider("사각형 칸 수", 1, 11, 5, key="triangles")
-        truss_percent = cols[1].slider("뼈대 높이 · 받침 사이 거리의 (%)", 10, 35, 20, 5, key="truss_percent")
-        reinforced = cols[2].toggle("대각선 보강재 추가", True, key="add_diagonals")
-    with tab_cable:
-        st.subheader("케이블은 당기고, 주탑은 눌려요")
-        cols = st.columns(2)
-        tower_cm = cols[0].slider("바닥판 위 주탑 높이 (cm)", 5, 50, 15, 1, key="tower_cm")
-        sag_percent = cols[1].slider("현수교 주케이블 늘어진 깊이 · 주탑 높이의 (%)", 20, 80, 50, 5, key="sag_percent")
-        angle = math.degrees(math.atan((tower_cm/100)/(span_cm/200)))
-        st.caption(f"사장교 가장 긴 안쪽 줄의 실제 기울기: {angle:.1f}°. 높이·거리로 정해지는 값이라 각도를 따로 바꾸지 않아요.")
+    selected_bridge = st.selectbox("학습할 교량과 건설 상황", BRIDGE_NAMES, format_func=lambda name: {
+        "단순교": "짧은 하천 · 단순교",
+        "아치교": "견고한 계곡 · 아치교",
+        "트러스교": "열차가 지나는 길 · 트러스교",
+        "사장교": "넓은 강 · 사장교",
+        "현수교": "깊은 해협 · 현수교",
+    }[name], key="selected_bridge")
+    st.caption("경간·재료·형상은 왼쪽 사이드바의 접힌 ‘심화 설정’에서 바꿀 수 있어요. 추 개수는 선택한 교량의 허용 범위 안에서 유지돼요.")
+    chapter_section = st.container()
 
 cfg = dict(span=span_cm/100, width=deck_width/100, weight_mass=mass_g/1000,
            member_width=member_width/1000, member_depth=member_depth/1000,
@@ -920,74 +1254,116 @@ cfg = dict(span=span_cm/100, width=deck_width/100, weight_mass=mass_g/1000,
            panels=panels, arch_ratio=arch_percent/100, truss_ratio=truss_percent/100,
            tower_ratio=tower_cm/span_cm, sag_ratio=sag_percent/100)
 sweeps = {kind: solve_sweep(kind, cfg) for kind in BRIDGE_NAMES}
+selected_sweep = (solve_sweep(selected_bridge, cfg, braced=reinforced)
+                  if selected_bridge == "트러스교" else sweeps[selected_bridge])
+load_limit = max(0, selected_sweep["capacity"])
+requested_load = st.session_state.get("load", 0)
+load_was_limited = requested_load > load_limit
+if "load" in st.session_state:
+    # 슬라이더 상한이 바뀌어 위젯이 다시 만들어져도 허용 범위의 값을 유지합니다.
+    st.session_state["load"] = max(0, min(requested_load, load_limit))
 
-with tab_beam:
-    st.caption(f"같은 거리 {span_cm} cm · {comparison_basis} · 허용 처짐 {span_cm*10/divisor:.2f} mm. 양옆 받침이 밀리지 않는 조건이에요.")
-    for col, kind in zip(st.columns(2), ["단순교", "아치교"]):
-        with col:
-            show_result(sweeps[kind], load, amplify, f"beam_{kind}")
-            bridge_guide_card(kind)
-    with st.expander("쉽게 이해하기 · 자와 둥근 문을 떠올려요", expanded=True):
-        st.write("**보**는 양끝에 걸친 자와 비슷해요. 같은 무게라도 거리를 늘리면 훨씬 많이 휘고, 막대의 세로 두께를 키우면 덜 휘어요. 휘는 보는 윗면이 눌리고 아랫면이 당겨져요. 단순보 위·아래의 가는 빨강·파랑 선은 이 휨을 보여 줘요. 다른 막대의 선 색은 부재 전체의 축력이고, 마우스를 올리면 휨의 크기도 볼 수 있어요.")
-        st.write("**아치**는 무게를 둥근 길을 따라 양끝으로 보내요. 대신 받침을 옆으로 밀어요. 왼쪽의 ‘받침·앵커 수평 허용 힘’을 줄여 보세요. 덜 휘더라도 받침이 힘을 못 견디면 기준을 넘을 수 있어요.")
+with chapter_section:
+    bridge_chapter_intro(selected_bridge)
+    st.subheader("② 하중 탐구 활동")
+    st.write("**하중이 증가하면 이 교량의 어느 부분에 어떤 힘이 작용하고, 구조는 어떻게 변할까?**")
+    st.caption("추를 올리면서 ① 하중이 가는 길 ② 인장·압축·휨을 받는 부재 ③ 처짐의 변화를 관찰해요.")
+    zoom_percent = st.session_state.get("bridge_zoom_percent", 100)
+    with st.container(key="bridge_viewport"):
+        figure_column, zoom_column = st.columns([1, .05], gap="small", vertical_alignment="center")
+        with figure_column:
+            figure_slot = st.container()
+        with zoom_column:
+            with st.container(key="bridge_zoom_controls"):
+                st.button("＋", key="bridge_zoom_in", help="그림 확대 (25%씩)",
+                          on_click=change_bridge_zoom, args=(25,), disabled=zoom_percent >= 250)
+                st.button("－", key="bridge_zoom_out", help="그림 축소 (25%씩)",
+                          on_click=change_bridge_zoom, args=(-25,), disabled=zoom_percent <= 50)
+                st.button("↺", key="bridge_zoom_reset", help="그림을 원래 크기로 (100%)",
+                          on_click=change_bridge_zoom, args=(0,))
+                st.caption(f"{zoom_percent}%")
+    st.caption("오른쪽 ＋ / － / ↺: 화면 확대·축소·원래 크기. 확대한 그림은 드래그해서 옮길 수 있어요. "
+               "힘·처짐 계산값과 변형 확대 배율은 그대로예요.")
+    if load_limit > 0:
+        load = st.slider("추를 올려 하중 늘리기", 0, load_limit, key="load", format="%d개")
+    else:
+        load = st.number_input("추를 올려 하중 늘리기", min_value=0, max_value=0, key="load", disabled=True)
+    if load_was_limited:
+        st.info(f"현재 교량·설정에서 허용되는 추는 {load_limit}개까지여서 추 개수를 줄였어요.")
+    if selected_sweep["capacity"] < 0:
+        st.caption("추를 올릴 수 없는 상태예요. 현재 구조의 안정성·자중과 심화 설정을 확인해 보세요.")
+    elif selected_sweep["censored"]:
+        st.caption("현재 조건에서 20개까지 기준 이내예요. 실험 범위 안에서만 추를 올릴 수 있어요.")
+    else:
+        st.caption(f"현재 조건에서는 추 {load_limit}개까지 올릴 수 있어요. 그 이상은 계산 기준을 넘어서 추가할 수 없어요.")
+    st.write(f"추 **{load}개 × {mass_g} g = {load*mass_g} g**을 올렸어요. "
+             f"추가 하중은 **{load*mass_g/1000*GRAVITY:.3f} N**이에요.")
+    st.caption("추의 총질량은 g, 누르는 힘(하중)은 N으로 나타내요. 추의 힘은 상판 전체에 고르게 나뉘어 작용한다고 가정해요. 추 0개에도 자체 무게가 작용할 수 있어요.")
+    context = (selected_bridge, tuple(sorted(cfg.items())), reinforced if selected_bridge == "트러스교" else True)
+    previous = st.session_state.get("_last_observation", {})
+    previous_count = previous.get("count") if previous.get("context") == context else None
+    show_result(selected_sweep, load, amplify, f"selected_{selected_bridge}", figure_slot, previous_count,
+                view_zoom=zoom_percent / 100)
+    st.session_state["_last_observation"] = dict(context=context, count=load)
+    st.subheader("③ 하중 전달 원리와 ④ 실제 적용 조건")
+    bridge_guide_card(selected_bridge)
+    if selected_bridge in ("트러스교", "사장교", "현수교"):
+        with st.expander("심화 탐구 · 보강과 형상 비교", expanded=False):
+            if selected_bridge == "트러스교":
+                # 왼쪽/오른쪽은 동일 단면을 사용해 대각선을 '추가'하는 효과만 비교합니다.
+                # 비교 기준이 총량 같게일 때도 이 짝 안에서는 오른쪽의 막대 단면을 그대로 사용합니다.
+                square_cfg = dict(cfg, equal_volume=False)
+                if cfg["equal_volume"]:
+                    width_mm, depth_mm = sweeps["트러스교"]["model"]["section_mm"]
+                    square_cfg.update(member_width=width_mm/1000, member_depth=depth_mm/1000)
+                square = solve_sweep("트러스교", square_cfg, False)
+                right = sweeps["트러스교"] if reinforced else square
+                for col, sweep, title, key in zip(st.columns(2), [square, right],
+                        ["보강 전 · 사각형", "대각선 추가 · 삼각형" if reinforced else "대각선 추가 대기"], ["truss_square", "truss_braced"]):
+                    with col:
+                        st.markdown(f"### {title}")
+                        show_result(sweep, load, amplify, key)
+                st.caption("이 두 그림에서는 막대 단면을 똑같이 두고 오른쪽에 굵은 실선 대각선만 더합니다. 추가한 재료량은 증가해요. 5종 비교는 왼쪽에서 선택한 재료 비교 기준을 사용합니다.")
+                st.info("회전이 자유로운 연결부의 사각형은 옆으로 움직일 수 있어 처짐 숫자를 정할 수 없어요. 접착부가 단단하게 각도를 고정하는 실물 사각형은 이 가정보다 잘 버틸 수 있어요.")
+                fig = data_figure("대각선으로 보강한 칸 수를 바꾸면?", "칸 수", "최대 처짐 (mm)", 310)
+                ns = list(range(1, 12))
+                series = [solve_sweep("트러스교", dict(cfg, panels=n))["results"][load] for n in ns]
+                fig.add_trace(go.Scatter(x=ns, y=[r["deflection_mm"] for r in series], mode="lines+markers", name="대각선 보강",
+                                         line=dict(color=COLORS["트러스교"])))
+                fig.add_vline(x=panels, line_dash="dot", line_color=SUPPORT_COLOR)
+                fig.update_xaxes(dtick=1)
+                chart(fig, "truss_efficiency")
+                st.caption("기준을 넘은 설정의 처짐도 선형식의 참고값으로 포함합니다. 칸이 많다고 무조건 유리하지는 않아요. 재료 총량을 같게 하면 막대가 가늘어지고, 줄어든 압축 막대 길이는 좌굴을 줄이는 데 도움이 돼요.")
+                with st.container(border=True):
+                    st.markdown("**대각선은 왜 필요할까요?**")
+                    st.write("사각형은 변 길이가 같아도 모서리 각도가 바뀔 수 있어요. 대각선 하나를 넣으면 두 삼각형이 생겨, 막대를 늘리거나 줄이지 않고는 모양을 바꾸기 어려워져요.")
+                    st.write("삼각형이 생겨도 막대·연결부가 무한히 강해지지는 않아요. 눌리는 막대가 길고 가늘면 좌굴하고, 연결부가 약하면 먼저 떨어질 수 있어요.")
 
-with tab_truss:
-    # 왼쪽/오른쪽은 동일 단면을 사용해 대각선을 '추가'하는 효과만 비교합니다.
-    # 비교 기준이 총량 같게일 때도 이 짝 안에서는 오른쪽의 막대 단면을 그대로 사용합니다.
-    square_cfg = dict(cfg, equal_volume=False)
-    if cfg["equal_volume"]:
-        width_mm, depth_mm = sweeps["트러스교"]["model"]["section_mm"]
-        square_cfg.update(member_width=width_mm/1000, member_depth=depth_mm/1000)
-    square = solve_sweep("트러스교", square_cfg, False)
-    right = sweeps["트러스교"] if reinforced else square
-    for col, sweep, title, key in zip(st.columns(2), [square, right],
-            ["보강 전 · 사각형", "대각선 추가 · 삼각형" if reinforced else "대각선 추가 대기"], ["truss_square", "truss_braced"]):
-        with col:
-            st.markdown(f"### {title}")
-            show_result(sweep, load, amplify, key)
-    st.caption("이 두 그림에서는 막대 단면을 똑같이 두고 오른쪽에 굵은 실선 대각선만 더합니다. 추가한 재료량은 증가해요. 5종 비교는 왼쪽에서 선택한 재료 비교 기준을 사용합니다.")
-    st.info("회전이 자유로운 연결부의 사각형은 옆으로 움직일 수 있어 처짐 숫자를 정할 수 없어요. 접착부가 단단하게 각도를 고정하는 실물 사각형은 이 가정보다 잘 버틸 수 있어요.")
-    fig = data_figure("대각선으로 보강한 칸 수를 바꾸면?", "칸 수", "최대 처짐 (mm)", 310)
-    ns = list(range(1, 12))
-    series = [solve_sweep("트러스교", dict(cfg, panels=n))["results"][load] for n in ns]
-    fig.add_trace(go.Scatter(x=ns, y=[r["deflection_mm"] for r in series], mode="lines+markers", name="대각선 보강",
-                             line=dict(color=COLORS["트러스교"])))
-    fig.add_vline(x=panels, line_dash="dot", line_color=SUPPORT_COLOR)
-    fig.update_xaxes(dtick=1)
-    chart(fig, "truss_efficiency")
-    st.caption("기준을 넘은 설정의 처짐도 선형식의 참고값으로 포함합니다. 칸이 많다고 무조건 유리하지는 않아요. 재료 총량을 같게 하면 막대가 가늘어지고, 줄어든 압축 막대 길이는 좌굴을 줄이는 데 도움이 돼요.")
-    bridge_guide_card("트러스교")
-    with st.expander("쉽게 이해하기 · 대각선은 왜 필요할까요?", expanded=True):
-        st.write("사각형은 변 길이가 같아도 모서리 각도가 바뀔 수 있어요. 대각선 하나를 넣으면 두 삼각형이 생겨, 막대를 늘리거나 줄이지 않고는 모양을 바꾸기 어려워져요.")
-        st.write("삼각형이 생겨도 막대·연결부가 무한히 강해지지는 않아요. 눌리는 막대가 길고 가늘면 좌굴하고, 연결부가 약하면 먼저 떨어질 수 있어요.")
+            if selected_bridge in ("사장교", "현수교"):
+                fig = data_figure("주탑 높이와 줄을 당기는 힘", "바닥판 위 주탑 높이 (cm)", "최대 줄 장력 · 양옆 합계 (N)")
+                heights = sorted(set([5, 10, 15, 20, 30, 40, 50, tower_cm]))
+                for cable_kind in ("사장교", "현수교"):
+                    tensions = [solve_sweep(cable_kind, dict(cfg, tower_ratio=h/span_cm))["results"][load]["tension"] for h in heights]
+                    fig.add_trace(go.Scatter(x=heights, y=tensions, mode="lines+markers", name=cable_kind,
+                                             line=dict(color=COLORS[cable_kind]),
+                                             hovertemplate="주탑 %{x} cm<br>장력 %{y:.3f} N<extra>%{fullData.name}</extra>"))
+                fig.add_vline(x=tower_cm, line_dash="dot", line_color=SUPPORT_COLOR)
+                chart(fig, "height_sensitivity")
+                st.caption("높이에 따른 장력은 현재 모형의 선형 계산값입니다. 주탑이 높아지면 장력이 줄 수 있지만, 실제 설계에서는 주탑의 압축과 좌굴도 함께 살핍니다.")
 
-with tab_cable:
-    for col, kind in zip(st.columns(2), ["사장교", "현수교"]):
-        with col:
-            show_result(sweeps[kind], load, amplify, f"cable_{kind}")
-            r = sweeps[kind]["results"][load]
-            st.metric("가장 크게 당겨지는 줄 · 양옆 합계", "계산 불가" if r["tension"] is None else f"{r['tension']:.2f} N")
-            bridge_guide_card(kind)
-    fig = data_figure("주탑 높이와 줄을 당기는 힘", "바닥판 위 주탑 높이 (cm)", "최대 줄 장력 · 양옆 합계 (N)")
-    heights = sorted(set([5, 10, 15, 20, 30, 40, 50, tower_cm]))
-    for kind in ["사장교", "현수교"]:
-        tensions = [solve_sweep(kind, dict(cfg, tower_ratio=h/span_cm))["results"][load]["tension"] for h in heights]
-        fig.add_trace(go.Scatter(x=heights, y=tensions, mode="lines+markers", name=kind,
-                                 line=dict(color=COLORS[kind]),
-                                 customdata=[math.degrees(math.atan((h/100)/(span_cm/200))) for h in heights],
-                                 hovertemplate="주탑 %{x} cm<br>장력 %{y:.3f} N<br>사장교 긴 줄 기울기 %{customdata:.1f}°<extra>%{fullData.name}</extra>"))
-    fig.add_vline(x=tower_cm, line_dash="dot", line_color=SUPPORT_COLOR)
-    chart(fig, "height_sensitivity")
-    st.caption("장력 곡선은 기준 초과 설정도 포함한 선형 참고값입니다. 현수교는 늘어진 깊이/주탑 높이 비율을 유지합니다. 주탑이 높아지면 줄의 힘이 줄어도, 긴 주탑의 좌굴이 먼저 문제가 될 수 있어요.")
-    with st.expander("쉽게 이해하기 · 줄이 세워질수록?", expanded=True):
-        st.write("**사장교**는 줄이 바닥판을 직접 들어 올려요. 줄이 수평에 가까우면 힘의 많은 부분이 옆으로 쓰여, 위로 받치려면 더 세게 당겨야 해요. 뒤쪽 줄과 앵커는 주탑이 한쪽으로 끌리지 않게 버텨요.")
-        st.write("**현수교**는 세로줄 → 주케이블 → 주탑·앵커로 힘을 전달해요. 하중이 바닥판 전체에 고르게 실리면 큰 줄은 포물선에 가까워요. 줄 자체 무게만 매달린 경우의 현수선과는 달라요.")
-        st.write("줄을 늘어뜨리면 옆으로 당기는 힘이 줄 수 있어요. 하지만 얇은 줄은 늘어나고, 약한 앵커는 밀릴 수 있어요. 이 실험은 작은 변형만 계산하므로 실제 줄이 크게 처지는 과정은 다루지 않아요.")
+                st.write("사장교는 경사진 줄이 상판을 직접 지지하고, 현수교는 세로줄에서 주케이블로 힘을 전달해요.")
+                st.caption("현수교는 주탑 높이를 바꿀 때 늘어진 깊이의 비율을 유지해요. 이 모형은 실제 초장경간의 바람 진동이나 시공 조건을 시험하지 않아요.")
 
-with tab_dashboard:
+with comparison_tab:
     st.subheader("5대 교량 · 조건에 따라 달라지는 결과")
+    st.caption("추 개수는 ‘교량 탐구’ 탭에서 조절한 값을 함께 사용해요.")
     mode = st.radio("비교 방식", ["두 교량 비교", "5종 전체 비교"], horizontal=True, key="comparison_mode")
     st.caption(f"공통 거리 {span_cm} cm · {comparison_basis} · 추 1개 {mass_g} g · 자체 무게 {'반영' if self_weight else '제외'}. 트러스교는 대각선 보강 구조입니다. 배치는 튼튼함의 순서가 아니에요.")
+    st.info("이 실험 결과는 설정된 경간, 재료, 하중 및 구조 조건에서 나타난 결과입니다. 실제 교량은 경간, 지반, 시공 조건 등에 따라 적합한 구조가 달라질 수 있습니다. 모형의 하중 지지 능력과 실제 건설 상황에서의 적합성은 서로 다른 판단 기준입니다.")
+    if comparison_basis == "골조 재료량 같게":
+        st.caption("재료량 비교는 골조 막대의 총부피 기준이에요. 케이블·종이 바닥판·받침은 같은 재료량으로 맞추지 않습니다.")
+    else:
+        st.caption("막대 굵기 비교는 같은 단면을 쓰며, 구조마다 골조 총재료량과 케이블·종이 사용량은 다를 수 있어요.")
     if mode == "두 교량 비교":
         cols = st.columns(2)
         left = cols[0].selectbox("비교 교량 A", BRIDGE_NAMES, key="compare_left")
@@ -1002,9 +1378,9 @@ with tab_dashboard:
     else:
         names = BRIDGE_NAMES
         st.markdown("### ⚖️ 0~20개 실험에서 마지막으로 기준 이내인 모습")
-        st.write("‘20개 이상’이면 실험 범위 안에서 한계에 닿지 않았어요. ‘0개도 기준 초과’라면 자체 무게부터 조건을 바꿔야 해요. 원래 모양의 그림은 안정성 또는 기준을 만족하지 못한 상태예요.")
+        st.write("‘20개 이상’이면 실험 범위 안에서 한계에 닿지 않았어요. ‘0개도 기준 초과’라면 자체 무게부터 조건을 바꿔야 해요. 평형을 계산하지 못한 구조만 변형 없이 뼈대로 표시해요.")
         chart(overview_figure(sweeps, amplify), "capacity_bridge_overview")
-        st.caption("이 그림만 각 교량의 마지막 기준 이내 추 개수를 올립니다. 아래 그래프는 왼쪽에서 선택한 현재 추 개수로 비교합니다. 트러스교는 가운데에 배치했습니다.")
+        st.caption("이 그림만 각 교량의 마지막 기준 이내 추 개수를 올립니다. 아래 그래프는 하중 탐구 본문에서 선택한 현재 추 개수로 비교합니다. 트러스교는 가운데에 배치했습니다.")
         show_planning_comparison(BRIDGE_NAMES)
     st.markdown(f"### 현재 추 {load}개 · 같은 하중 비교")
     cols = st.columns(2)
@@ -1036,6 +1412,7 @@ with tab_dashboard:
     with st.expander("쉽게 이해하기 · 덜 휘면 무조건 더 튼튼할까요?", expanded=True):
         st.write("꼭 그렇지는 않아요. 덜 휘어도 약한 연결부가 먼저 떨어지거나, 압축 막대가 옆으로 꺾일 수 있어요. 그래서 여러 기준 중 가장 여유가 적은 곳을 함께 확인해요.")
         st.write("‘기준 대비 여유 2배’는 현재 필요한 힘·처짐에 비해 허용량이 두 배라는 뜻이에요. 다리 자체 무게도 포함하므로, 추를 정확히 두 배 더 올려도 된다는 뜻은 아니에요.")
+        st.write("트러스가 많은 추를 버텨 보일 때는 삼각형 부재의 힘 분담과 짧게 설정한 좌굴 길이가 영향을 줘요. 케이블을 골조 재료량에서 빼는 등 모형의 가정도 결과에 영향을 주므로, 실제 교량의 우열을 뜻하지 않아요.")
         st.write("거리와 재료량을 맞춘 뒤 조건을 하나씩 바꿔 보세요. 짧은 다리, 긴 다리, 약한 받침에 유리한 구조가 서로 달라져요. 이 모형 결과를 실제 큰 교량의 우열로 해석하지 않아요.")
     st.markdown("### 📖 탐구한 교량의 특징과 장단점")
     bridge_guide_cards(names)
