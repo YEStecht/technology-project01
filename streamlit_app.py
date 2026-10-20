@@ -1,17 +1,24 @@
 """교량 개념 실험실 — 실행: python -m streamlit run streamlit_app.py
 
 처음 수정한다면 MATERIALS, build_model(), solve_sweep()부터 살펴보세요.
-모든 화면·계산·그래프를 이 파일에 모았습니다. 외부 데이터는 필요하지 않습니다.
+학습 화면·계산·그래프는 이 파일, 추 그림과 조절 버튼은 weight_interaction.py에 있습니다.
+교량별 이름표 그림과 용어 풀이는 bridge_anatomy.py에 있습니다.
+외부 데이터는 필요하지 않습니다.
 """
 
 import math
 import re
 from html import escape
+from pathlib import Path
 
 import numpy as np
+from PIL import Image
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import streamlit as st
+
+from weight_interaction import WEIGHT_IMAGE_SOURCE, render_weight_controls
+from bridge_anatomy import bridge_anatomy_diagram, bridge_parts_legend, part_badges, part_meanings
 
 
 # ── 1. 수업에서 바꾸기 쉬운 설정 ────────────────────────────────────────
@@ -74,6 +81,49 @@ BRIDGE_GUIDES = {
     },
 }
 
+# 사진별 출처·라이선스와 구조 분류 근거: assets/bridges/CREDITS.md
+BRIDGE_EXAMPLES = {
+    "단순교": {
+        "name": "일산대교 — 거더교", "file": "ilsan.jpg",
+        "description": "상판 아래의 긴 보(거더)를 교각이 받치는 모습을 확인할 수 있어요.",
+        "note": "거더 구조의 실제 사례입니다. 실제 교량의 여러 경간과 받침 조건은 이 앱의 양끝 받침 단순보 모형과 다릅니다.",
+        "author": "Glabb",
+        "source": "https://commons.wikimedia.org/wiki/File:Ilsan_Bridge1.jpg",
+        "license": "CC BY-SA 3.0", "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+    },
+    "아치교": {
+        "name": "서강대교 — 아치교", "file": "seogang.jpg",
+        "description": "붉은 곡선 아치와 상판을 연결하는 경사진 줄을 확인할 수 있어요.",
+        "note": "사진은 닐센 아치 구간입니다. 이 앱의 세로 지지대 아치 모형과 연결 방식이 다릅니다.",
+        "author": "yujinunion2",
+        "source": "https://commons.wikimedia.org/wiki/File:Seoul-3215895.jpg",
+        "license": "CC0 1.0", "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+    },
+    "트러스교": {
+        "name": "성산대교 — 트러스교", "file": "seongsan.jpg",
+        "description": "상판 아래 붉은 막대들이 삼각형으로 연결되어 하중을 나누어 받는 구조를 볼 수 있어요.",
+        "author": "Glabb",
+        "source": "https://commons.wikimedia.org/wiki/File:Seongsan_Bridge1.jpg",
+        "license": "CC BY-SA 3.0", "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+    },
+    "사장교": {
+        "name": "인천대교 — 사장교", "file": "incheon.jpg",
+        "description": "주탑에서 비스듬히 뻗은 케이블이 상판을 직접 지지하는 모습을 확인할 수 있어요.",
+        "author": "Jinho Jung",
+        "source": "https://commons.wikimedia.org/wiki/File:Incheon_bridge_(7).jpg",
+        "license": "CC BY-SA 2.0", "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+    },
+    "현수교": {
+        "name": "광안대교 — 현수교", "file": "gwangan.jpg",
+        "description": "주탑 사이에 늘어진 주케이블과 상판을 매단 세로줄(행어)을 확인할 수 있어요.",
+        "note": "사진은 현수교 구간입니다. 광안대교에는 트러스교와 접속교 구간도 있습니다.",
+        "author": "Richard Irwin",
+        "source": "https://commons.wikimedia.org/wiki/File:Gwang_An_Bridge.jpg",
+        "license": "퍼블릭 도메인 (저작자 공개)",
+        "license_url": "https://commons.wikimedia.org/wiki/File:Gwang_An_Bridge.jpg#Licensing",
+    },
+}
+
 COMPRESSION = "#e05252"
 TENSION = "#287bd1"
 LOAD_COLOR = "#c56a20"
@@ -101,11 +151,12 @@ st.markdown(
     [data-testid="stMain"] [data-testid="stMarkdownContainer"] li {
         font-size: 1rem; line-height: 1.75; word-break: keep-all; overflow-wrap: anywhere;
     }
-    [data-testid="stMain"] [data-testid="stCaptionContainer"] { color: inherit; }
+    /* 설명과 출처도 본문 색을 그대로 사용해 글자가 흐려지지 않게 합니다. */
+    [data-testid="stCaptionContainer"] { color: inherit; opacity: 1; }
     [data-testid="stMain"] [data-testid="stCaptionContainer"] p {
         font-size: .9rem; line-height: 1.65;
         word-break: keep-all; overflow-wrap: break-word;
-        color: color-mix(in srgb, currentColor 78%, transparent);
+        color: inherit;
     }
     [data-testid="stWidgetLabel"] p { font-weight: 600; }
     [data-testid="stMain"] button { min-height: 44px; }
@@ -122,8 +173,35 @@ st.markdown(
     .concept-focus { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .25em; }
     .load-path { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: .5rem 0 .75rem; }
     .path-segment { display: inline-flex; align-items: center; gap: .5rem; max-width: 100%; }
-    .path-node { padding: .35rem .55rem; background: color-mix(in srgb, currentColor 6%, transparent); border-radius: 5px; line-height: 1.6; word-break: keep-all; }
+    .load-path-help { position: relative; }
+    .path-node { background: color-mix(in srgb, currentColor 6%, transparent); border-radius: 5px; line-height: 1.6; word-break: keep-all; }
+    .path-node > summary { padding: .25rem .45rem; min-height: 32px; box-sizing: border-box;
+        list-style: none; cursor: help; font-size: .95rem; }
+    .path-node > summary::-webkit-details-marker { display: none; }
+    .path-node > summary:focus-visible { outline: 2px solid #177568; outline-offset: 2px; border-radius: 5px; }
+    .path-explanation { display: none; position: absolute; top: calc(100% + .25rem); left: 0; right: 0;
+        z-index: 10; padding: .6rem .75rem; border-radius: 6px; pointer-events: none;
+        background: #fbfcfe; color: #243447;
+        background: light-dark(#fbfcfe, #20242c); color: light-dark(#243447, #f4f6f8);
+        border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+        box-shadow: 0 3px 10px rgba(0,0,0,.12); font-size: .9rem; line-height: 1.65;
+        font-weight: 400; word-break: keep-all; overflow-wrap: anywhere; }
+    .path-node[open] .path-explanation, .path-node > summary:focus-visible .path-explanation { display: block; }
+    .path-node > summary:focus-visible .path-explanation { z-index: 12; }
+    @media (hover: hover) {
+        .path-node > summary:hover .path-explanation { display: block; z-index: 13; }
+    }
     .path-arrow { font-size: 1.15rem; }
+    .bridge-anatomy-diagram { display: block; width: 100%; max-width: 360px; height: auto; margin: .25rem auto .4rem; }
+    .bridge-part-number { display: inline-flex; align-items: center; justify-content: center;
+        width: 1.3rem; height: 1.3rem; margin-right: .3rem; border-radius: 50%;
+        background: #177568; color: white; font-size: .8rem; font-weight: 700; vertical-align: middle; }
+    .bridge-part-legend { margin: .65rem 0; font-size: .95rem; line-height: 1.75; }
+    .bridge-part-legend > div { margin: .3rem 0; word-break: keep-all; overflow-wrap: anywhere; }
+    .bridge-part-legend dt, .bridge-part-legend dd { display: inline; margin: 0; }
+    .bridge-part-legend dt { font-weight: 600; }
+    .bridge-glossary { margin: .35rem 0; }
+    .bridge-glossary > summary { font-size: .9rem; cursor: pointer; padding: .15rem 0; }
     .study-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; padding: 0; margin: .5rem 0 1rem; list-style: none; }
     .study-steps li { display: flex; gap: .65rem; align-items: flex-start; }
     .study-steps strong, .study-steps small { display: block; }
@@ -186,6 +264,8 @@ st.markdown(
     }
     [data-testid="stDataFrame"] { border-radius: 8px; }
     @media (max-width: 640px) {
+        .path-node > summary { min-height: 44px; padding: .5rem .45rem; }
+        .bridge-glossary > summary { min-height: 44px; display: list-item; align-content: center; }
         .block-container { padding: 3.5rem 1rem 3rem; }
         [data-testid="stTabs"] [role="tablist"] { gap: 4px; }
         [data-testid="stTabs"] [role="tab"] { padding: 12px 10px; }
@@ -619,11 +699,16 @@ def draw_weights(fig, count, y_at, positions, arrow_size=0.8, block_width=0.4, t
             f"L {x-block_width*.30},{bottom+WEIGHT_BODY_HEIGHT} Z"
         )
         fig.add_shape(type="path", path=path, name="추 몸체",
-                      line=dict(color="#52647c", width=1), fillcolor="#8297aa")
+                      line=dict(color="#52647c", width=1), fillcolor="rgba(0,0,0,0)")
         fig.add_shape(type="circle", name="추 고리",
                       x0=x-block_width*.15, x1=x+block_width*.15,
                       y0=bottom+WEIGHT_BODY_HEIGHT, y1=bottom+WEIGHT_BODY_HEIGHT+WEIGHT_RING_HEIGHT,
                       line=dict(color="#8297aa", width=2), fillcolor="rgba(0,0,0,0)")
+        fig.add_layout_image(
+            source=WEIGHT_IMAGE_SOURCE, xref="x", yref="y", x=x, y=bottom,
+            sizex=block_width, sizey=WEIGHT_BODY_HEIGHT+WEIGHT_RING_HEIGHT,
+            xanchor="center", yanchor="bottom", sizing="stretch", layer="above",
+        )
     x = positions[0]
     stack_top = float(y_at(x)) + .1 + (count-1)*WEIGHT_STACK_STEP + WEIGHT_BODY_HEIGHT + WEIGHT_RING_HEIGHT
     arrow_top = stack_top + arrow_size + .3
@@ -668,15 +753,29 @@ def learning_icon(name):
     return f'<svg class="learning-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">{paths[name]}</svg>'
 
 
-def load_path_diagram(path):
+def load_path_diagram(path, kind=None):
     branches = []
-    for branch in path.split(" / "):
+    for branch_index, branch in enumerate(path.split(" / ")):
         nodes = []
         for index, node in enumerate(branch.split(" → ")):
             arrow_html = '<span class="path-arrow" aria-hidden="true">→</span>' if index else ""
-            nodes.append(f'<span class="path-segment">{arrow_html}<span class="path-node">{escape(node)}</span></span>')
+            numbers = part_badges(kind, node)
+            meanings = part_meanings(kind, node)
+            if meanings:
+                note_id = f"path-part-{kind}-{branch_index}-{index}"
+                explanation = '<br>'.join(f'<strong>{escape(name)}</strong> — {escape(meaning)}'
+                                         for name, meaning in meanings)
+                node_html = (
+                    '<details class="path-node" name="bridge-part-meaning">'
+                    f'<summary aria-label="{escape(node)} 설명" aria-describedby="{note_id}">'
+                    f'{numbers}{escape(node)}<span class="path-explanation" role="tooltip" '
+                    f'id="{note_id}">{explanation}</span></summary></details>'
+                )
+            else:
+                node_html = f'<span class="path-node">{escape(node)}</span>'
+            nodes.append(f'<div class="path-segment">{arrow_html}{node_html}</div>')
         branches.append('<div class="load-path">' + " ".join(nodes) + '</div>')
-    return '<div aria-label="하중이 전달되는 과정">' + "".join(branches) + '</div>'
+    return '<div class="load-path-help" aria-label="하중이 전달되는 과정">' + "".join(branches) + '</div>'
 
 
 def force_primer():
@@ -694,6 +793,80 @@ def force_primer():
     st.markdown('<div class="force-primer">' + "".join(items) + '</div>', unsafe_allow_html=True)
 
 
+def triangular_truss_diagram():
+    """꼭대기에 수직 하중을 받는 정삼각형 핀 트러스의 개념 그림입니다."""
+    top = (200., 230. - 100. * math.sqrt(3))
+    left, right = (100., 230.), (300., 230.)
+
+    def force_arrow(start, end, color):
+        dx, dy = end[0] - start[0], end[1] - start[1]
+        length = math.hypot(dx, dy)
+        ux, uy = dx / length, dy / length
+        wings = [(end[0] - 9*ux + sign*5*uy, end[1] - 9*uy - sign*5*ux)
+                 for sign in (-1, 1)]
+        return (f'<path d="M{start[0]},{start[1]} L{end[0]},{end[1]} '
+                f'M{wings[0][0]},{wings[0][1]} L{end[0]},{end[1]} '
+                f'L{wings[1][0]},{wings[1][1]}" stroke="{color}" '
+                'stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>')
+
+    members = []
+    for start, end, color, compression in [
+        (left, top, COMPRESSION, True), (right, top, COMPRESSION, True),
+        (left, right, TENSION, False),
+    ]:
+        members.append(f'<path d="M{start[0]},{start[1]} L{end[0]},{end[1]}" '
+                       f'stroke="{color}" stroke-width="9" opacity=".3"/>')
+        def point(t):
+            return (start[0] + t*(end[0]-start[0]), start[1] + t*(end[1]-start[1]))
+        # 압축은 가운데로, 인장은 양끝으로 향하는 화살표로 표시합니다.
+        for a, b in ([(.18, .43), (.82, .57)] if compression else [(.43, .18), (.57, .82)]):
+            members.append(force_arrow(point(a), point(b), color))
+
+    return (
+        '<svg class="triangular-truss-diagram" viewBox="0 0 400 310" '
+        'style="display:block;width:100%;max-width:360px;height:auto;margin:.5rem auto" '
+        'role="img" aria-labelledby="truss-concept-title truss-concept-description">'
+        '<title id="truss-concept-title">정삼각형 하나로 보는 트러스의 원리</title>'
+        '<desc id="truss-concept-description">꼭대기에 아래로 하중을 가하면 기울어진 두 막대는 압축, '
+        '아랫막대는 인장을 받습니다. 왼쪽 핀 받침과 오른쪽 롤러 받침이 하중을 지반으로 전달합니다. '
+        '막대 위의 화살표는 막대에 작용하는 인장과 압축의 방향입니다.</desc>'
+        + ''.join(members)
+        + force_arrow((200, 10), (200, top[1]-9), LOAD_COLOR)
+        + '<g fill="currentColor" font-size="20" text-anchor="middle">'
+        '<text x="241" y="31">하중</text>'
+        '<text x="98" y="142">압축</text><text x="302" y="142">압축</text>'
+        '<text x="200" y="260">인장</text>'
+        '<text x="200" y="301">양쪽 받침 → 지반</text></g>'
+        '<g stroke="currentColor" stroke-width="1.5" fill="none" opacity=".7">'
+        '<path d="M100 235 88 255H112Z M82 260H118 M300 235 288 252H312Z M282 266H318"/>'
+        '<circle cx="294" cy="258" r="4"/><circle cx="306" cy="258" r="4"/></g>'
+        + ''.join(f'<circle cx="{x}" cy="{y}" r="4" fill="currentColor"/>'
+                  for x, y in (left, top, right))
+        + '</svg>'
+    )
+
+
+def bridge_example(kind):
+    """검증한 로컬 사진만 표시하고 누락·손상 시에도 사례 설명을 유지합니다."""
+    example = BRIDGE_EXAMPLES[kind]
+    with st.container(key="bridge_example", width=560):
+        try:
+            path = Path(__file__).resolve().parent / "assets" / "bridges" / example["file"]
+            with Image.open(path) as photo:
+                photo.load()
+                st.image(photo, width="stretch")
+        except (OSError, ValueError):
+            st.caption("사진을 불러올 수 없어 실제 사례를 글로 안내합니다.")
+        st.markdown(f"**{example['name']}**")
+        st.write(example["description"])
+        if example.get("note"):
+            st.caption(example["note"])
+        st.caption(
+            f"사진: {example['author']} · [Wikimedia Commons 원본]({example['source']}) · "
+            f"[{example['license']}]({example['license_url']}) · 잘라내기·크기 조정·JPEG 압축"
+        )
+
+
 def bridge_chapter_intro(kind):
     guide = BRIDGE_GUIDES[kind]
     with st.container(key="bridge_intro"):
@@ -701,12 +874,29 @@ def bridge_chapter_intro(kind):
         st.markdown(f"<p><strong>{escape(guide['title'])}</strong> · {highlight_learning_text(guide['shape'])}</p>", unsafe_allow_html=True)
         principle, load_path = st.columns([1.1, 1], gap="large")
         principle.markdown(f'<p>{learning_icon("bulb")} <strong>하중을 견디는 원리</strong></p><p>{highlight_learning_text(guide["principle"])}</p>', unsafe_allow_html=True)
-        load_path.markdown(f'<p>{learning_icon("arrow")} <strong>하중이 전달되는 과정</strong></p>' + load_path_diagram(guide["load_path"]), unsafe_allow_html=True)
-        st.caption(f"활용 상황: {guide['use']}")
+        principle.markdown(f'<p><strong>활용 상황</strong><br>{escape(guide["use"])}</p>', unsafe_allow_html=True)
+        if kind == "트러스교":
+            principle.markdown(triangular_truss_diagram(), unsafe_allow_html=True)
+            principle.caption("꼭대기를 누르면 기울어진 두 막대는 압축, 아랫막대는 인장을 받아요. 아랫막대는 양쪽이 벌어지려는 것을 잡아 줍니다.")
+            principle.caption("막대를 핀으로 연결한 개념 그림입니다. 화살표는 막대에 작용하는 힘의 방향이며, 아래 하중 실험의 계산 결과와는 별개입니다.")
+        load_path.markdown(
+            f'<p>{learning_icon("arrow")} <strong>하중이 전달되는 과정</strong></p>'
+            + bridge_anatomy_diagram(kind) + load_path_diagram(guide["load_path"], kind)
+            + '<details class="bridge-glossary"><summary>용어 전체 보기</summary>'
+            + bridge_parts_legend(kind) + '</details>', unsafe_allow_html=True,
+        )
+        load_path.caption("모형 그림과 같은 번호예요. 경로의 이름에 마우스를 올리거나 눌러 뜻을 확인하세요.")
+
+
+def bridge_application(kind):
+    """하중 실험에서 관찰한 구조를 실제 교량 사례와 연결합니다."""
+    guide = BRIDGE_GUIDES[kind]
+    with st.container(key="bridge_application"):
         with st.expander("실제 적용 조건과 사례", expanded=False):
             st.write(guide["limit"])
             st.caption(f"사례: {guide['examples']}. 실제 교량은 경간·지반·시공 조건을 함께 고려하여 선택합니다.")
-            st.caption("모형의 상판 보도 하중을 나누어 받습니다. 위 과정은 각 구조의 대표적인 하중 전달 경로입니다.")
+            st.caption("모형의 상판 보도 하중을 나누어 받습니다. 구조 소개의 하중 전달 과정은 각 구조의 대표적인 경로입니다.")
+            bridge_example(kind)
 
 
 def data_figure(title, x_title, y_title, height=340):
@@ -1040,6 +1230,8 @@ def overview_figure(sweeps, amplify):
             fig.add_trace(trace, row=row, col=col)
         for shape in source.layout.shapes or []:
             fig.add_shape(shape.to_plotly_json(), row=row, col=col)
+        for picture in source.layout.images or []:
+            fig.add_layout_image(picture.to_plotly_json(), row=row, col=col)
         xref, yref = ("x" if idx == 1 else f"x{idx}"), ("y" if idx == 1 else f"y{idx}")
         for ann in source.layout.annotations or []:
             data = ann.to_plotly_json()
@@ -1293,6 +1485,7 @@ with chapter_section:
                 st.button("↺", key="bridge_zoom_reset", help="그림을 원래 크기로 (100%)",
                           on_click=change_bridge_zoom, args=(0,))
                 st.caption(f"{zoom_percent}%")
+    render_weight_controls(st.session_state.get("load", 0), load_limit)
     st.caption("오른쪽 ＋ / － / ↺는 화면 크기만 조절합니다. 확대한 그림은 드래그하여 이동할 수 있습니다.")
     if load_limit > 0:
         load = st.slider("추의 개수 조절하기", 0, load_limit, key="load", format="%d개")
@@ -1314,6 +1507,7 @@ with chapter_section:
     show_result(selected_sweep, load, amplify, f"selected_{selected_bridge}", figure_slot, previous_count,
                 view_zoom=zoom_percent / 100)
     st.session_state["_last_observation"] = dict(context=context, count=load)
+    bridge_application(selected_bridge)
     if selected_bridge in ("트러스교", "사장교", "현수교"):
         shape_exploration = st.expander("심화 탐구 · 보강과 형상 비교", expanded=False,
                                         key="shape_exploration", on_change="rerun")

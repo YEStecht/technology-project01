@@ -3,6 +3,7 @@
 import ast
 import json
 from pathlib import Path
+import tempfile
 import unittest
 
 from streamlit.testing.v1 import AppTest
@@ -115,7 +116,13 @@ class BridgeLearningTests(unittest.TestCase):
                     rings = [s for s in fig.layout.shapes if s.name == "추 고리"]
                     self.assertEqual(len(bodies), count)
                     self.assertEqual(len(rings), count)
+                    self.assertEqual(len(fig.layout.images), count)
                     self.assertAlmostEqual(fig.layout.meta["load_x"], 6.)
+                    for index, image in enumerate(fig.layout.images):
+                        self.assertAlmostEqual(image.x, 6.)
+                        self.assertAlmostEqual(image.y, fig.layout.meta["load_y"] + .1
+                                               + index*self.calc["WEIGHT_STACK_STEP"])
+                        self.assertEqual(image.yanchor, "bottom")
                     for index, ring in enumerate(rings):
                         self.assertAlmostEqual((ring.x0+ring.x1)/2, 6.)
                         if index:
@@ -132,6 +139,7 @@ class BridgeLearningTests(unittest.TestCase):
         self.assertNotIn("load", [s.key for s in self.app.sidebar.slider])
         self.assertFalse(self.app.sidebar.expander[0].proto.expanded)
         self.app.slider(key="load").set_value(2)
+        photo_urls = set()
         for kind in self.calc["BRIDGE_NAMES"]:
             with self.subTest(kind=kind):
                 self.app.selectbox(key="selected_bridge").set_value(kind)
@@ -142,6 +150,31 @@ class BridgeLearningTests(unittest.TestCase):
                                  f"{sweep['results'][2]['deflection_mm']:.4f} mm")
                 self.assertTrue(any(f"selected_{kind}" in p.proto.id
                                     for p in self.app.get("plotly_chart")))
+                photos = self.app.get("image")
+                self.assertEqual(len(photos), 1)
+                photo_urls.add(photos[0].proto.imgs[0].url)
+        self.assertEqual(len(photo_urls), 5)
+
+    def test_missing_and_corrupt_photos_preserve_text_and_experiment(self):
+        # 별도 앱 사본에서 실제 누락·손상 파일을 사용하고 저장소 사진은 건드리지 않습니다.
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            copied_app = root / APP.name
+            copied_app.write_text(APP.read_text(), encoding="utf-8")
+            photo = root / "assets" / "bridges" / self.calc["BRIDGE_EXAMPLES"]["단순교"]["file"]
+            for corrupt in (False, True):
+                with self.subTest(corrupt=corrupt):
+                    if corrupt:
+                        photo.parent.mkdir(parents=True)
+                        photo.write_bytes(b"invalid JPEG data")
+                    app = AppTest.from_file(str(copied_app), default_timeout=60).run()
+                    app.slider(key="load").set_value(1).run()
+                    self.assertEqual([e.message for e in app.exception], [])
+                    self.assertEqual(len(app.get("image")), 0)
+                    self.assertTrue(any("사진을 불러올 수 없어" in c.value for c in app.caption))
+                    self.assertIn("**일산대교 — 거더교**", [m.value for m in app.markdown])
+                    self.assertEqual(app.slider(key="load").value, 1)
+                    self.assertTrue(app.get("plotly_chart"))
 
     def test_load_changes_use_actual_values_in_both_directions(self):
         sweep = self.calc["solve_sweep"]("단순교", self.config())
