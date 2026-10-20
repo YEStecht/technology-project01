@@ -109,20 +109,27 @@ class BridgeLearningTests(unittest.TestCase):
     def test_weights_stack_at_the_central_load_position(self):
         for kind in self.calc["BRIDGE_NAMES"]:
             sweep = self.calc["solve_sweep"](kind, self.config())
-            for count in (0, 1, 3, 11, 20):
+            for count in (0, 1, 5, 11, 20):
                 with self.subTest(kind=kind, count=count):
                     fig = self.calc["experiment_figure"](sweep, count, 0, 1)
+                    visible = fig.layout.meta["visible_weight_count"]
+                    self.assertLessEqual(visible, min(count, self.calc["MAX_VISIBLE_WEIGHTS"]))
+                    self.assertEqual(visible == 0, count == 0)
+                    if kind != "현수교":
+                        self.assertEqual(visible, min(count, self.calc["MAX_VISIBLE_WEIGHTS"]))
                     bodies = [s for s in fig.layout.shapes if s.name == "추 몸체"]
                     rings = [s for s in fig.layout.shapes if s.name == "추 고리"]
-                    self.assertEqual(len(bodies), count)
-                    self.assertEqual(len(rings), count)
-                    self.assertEqual(len(fig.layout.images), count)
+                    self.assertEqual(len(bodies), visible)
+                    self.assertEqual(len(rings), visible)
+                    self.assertEqual(len(fig.layout.images), visible)
                     self.assertAlmostEqual(fig.layout.meta["load_x"], 6.)
                     for index, image in enumerate(fig.layout.images):
                         self.assertAlmostEqual(image.x, 6.)
                         self.assertAlmostEqual(image.y, fig.layout.meta["load_y"] + .1
                                                + index*self.calc["WEIGHT_STACK_STEP"])
                         self.assertEqual(image.yanchor, "bottom")
+                        if index:
+                            self.assertGreater(image.y, fig.layout.images[index-1].y + image.sizey)
                     for index, ring in enumerate(rings):
                         self.assertAlmostEqual((ring.x0+ring.x1)/2, 6.)
                         if index:
@@ -130,8 +137,12 @@ class BridgeLearningTests(unittest.TestCase):
                     arrows = [a for a in fig.layout.annotations if a.arrowcolor == self.calc["LOAD_COLOR"]]
                     self.assertEqual(len(arrows), int(count > 0))
                     if count:
+                        badge = next(a for a in fig.layout.annotations if a.name == "weight_count")
+                        self.assertIn(f"추 {count}개", badge.text)
+                        self.assertEqual("개만 표시" in badge.text, count > visible)
                         self.assertEqual(arrows[0].x, arrows[0].ax)
                         self.assertGreater(arrows[0].ay, arrows[0].y)
+                        self.assertGreater(arrows[0].y, fig.layout.images[-1].y + fig.layout.images[-1].sizey)
                         self.assertGreater(fig.layout.yaxis.range[1], fig.layout.meta["load_top"])
 
     def test_five_bridges_and_single_main_load_control(self):
@@ -218,6 +229,13 @@ class BridgeLearningTests(unittest.TestCase):
                             else:
                                 self.assertLess(projection, 0)  # 중심 쪽으로 누름
                                 self.assertEqual(arrow.arrowcolor, self.calc["COMPRESSION"])
+                            if e["form"] != "beam":
+                                points = self.calc["member_display_points"](sweep["model"], e, shown * 12/config["span"])
+                                direction = points[1] - points[0]
+                                for point in ([arrow.x, arrow.y], [arrow.ax, arrow.ay]):
+                                    along = np.dot(np.array(point)-points[0], direction) / np.dot(direction, direction)
+                                    self.assertGreaterEqual(along, 0)
+                                    self.assertLessEqual(along, 1)
                             self.assertEqual(arrow.text, "")
                         bending = [a for a in fig.layout.annotations if (a.name or "").startswith("member_bending_")]
                         for arrow in bending:

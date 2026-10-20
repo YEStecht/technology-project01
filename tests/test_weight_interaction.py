@@ -27,7 +27,8 @@ class WeightInteractionTests(unittest.TestCase):
         plot = next(p for p in self.app.get("plotly_chart") if "selected_" in p.proto.id)
         figure = json.loads(plot.proto.spec)
         self.assertEqual(figure["layout"]["meta"]["requested_count"], count)
-        self.assertEqual(len(figure["layout"].get("images", [])), count)
+        self.assertEqual(len(figure["layout"].get("images", [])),
+                         figure["layout"]["meta"]["visible_weight_count"])
         self.assertEqual(self.app.button(key="weight_remove").disabled, count == 0)
         self.assertEqual(self.app.button(key="weight_add").disabled, count >= control.max)
 

@@ -131,9 +131,10 @@ SUPPORT_COLOR = "#8195a7"
 # 내부 힘을 읽기 위한 그림용 두께입니다. 계산 단면과 별개입니다.
 BEAM_HALF_DEPTH = .8
 TOWER_BASE_DEPTH = 1.6  # 주탑 하부와 기초를 잇는 그림용 길이
-WEIGHT_BODY_HEIGHT = .16  # 아래 치수는 추 아이콘을 그리기 위한 값입니다.
-WEIGHT_RING_HEIGHT = .08
-WEIGHT_STACK_STEP = .28
+WEIGHT_BODY_HEIGHT = .50  # 아래 치수는 추 아이콘을 그리기 위한 값입니다.
+WEIGHT_RING_HEIGHT = .25
+WEIGHT_STACK_STEP = .92
+MAX_VISIBLE_WEIGHTS = 5  # 많은 추는 일부 그림과 정확한 총개수를 함께 표시합니다.
 PLOT_CONFIG = {"displayModeBar": False, "responsive": True}
 
 st.set_page_config(page_title="교량 구조 디지털 탐구 학습지", page_icon="🌉", layout="wide", initial_sidebar_state="collapsed")
@@ -262,6 +263,9 @@ st.markdown(
     .st-key-bridge_zoom_controls [data-testid="stCaptionContainer"] {
         text-align: center;
     }
+    /* 구조 비교는 두 열 배치를 유지하며 좁은 화면에서는 그림 안에서 가로로 이동합니다. */
+    .st-key-bridge_overview_scroll { overflow-x: auto; }
+    .st-key-bridge_overview { min-width: 680px; }
     [data-testid="stDataFrame"] { border-radius: 8px; }
     @media (max-width: 640px) {
         .path-node > summary { min-height: 44px; padding: .5rem .45rem; }
@@ -685,11 +689,13 @@ def support(fig, x, y=0, roller=False, depth=1.25, half_width=0.4):
                                          size=15, color=SUPPORT_COLOR), showlegend=False))
 
 
-def draw_weights(fig, count, y_at, positions, arrow_size=0.8, block_width=0.4, total_force=None):
-    """같은 위치에 추를 한 개씩 쌓고, 그 위에 전체 하중의 화살표를 그립니다."""
+def draw_weights(fig, count, y_at, positions, arrow_size=0.8, block_width=0.4, total_force=None,
+                 max_visible=MAX_VISIBLE_WEIGHTS):
+    """중앙에 간격을 두고 쌓으며, 많은 추는 일부 그림과 정확한 개수로 표시합니다."""
     if count == 0 or not positions:
         return None
-    for index, x in enumerate(positions):
+    visible = min(count, max_visible)
+    for index, x in enumerate(positions[:visible]):
         bottom = float(y_at(x)) + 0.1 + index * WEIGHT_STACK_STEP
         # 사다리꼴 몸체: 윗부분이 좁고 아래가 넓은 실험용 추 모양입니다.
         path = (
@@ -710,8 +716,15 @@ def draw_weights(fig, count, y_at, positions, arrow_size=0.8, block_width=0.4, t
             xanchor="center", yanchor="bottom", sizing="stretch", layer="above",
         )
     x = positions[0]
-    stack_top = float(y_at(x)) + .1 + (count-1)*WEIGHT_STACK_STEP + WEIGHT_BODY_HEIGHT + WEIGHT_RING_HEIGHT
+    stack_bottom = float(y_at(x)) + .1
+    stack_top = stack_bottom + (visible-1)*WEIGHT_STACK_STEP + WEIGHT_BODY_HEIGHT + WEIGHT_RING_HEIGHT
     arrow_top = stack_top + arrow_size + .3
+    fig.add_annotation(
+        name="weight_count", x=x+block_width/2+.25, y=arrow_top-.35,
+        text=f"추 {count}개" + (f"<br>({visible}개만 표시)" if count > visible else ""),
+        xanchor="left", showarrow=False, font=dict(size=13, color="#243447"),
+        bgcolor="rgba(251,252,254,.94)", borderpad=3,
+    )
     arrow(fig, (x, arrow_top), (x, stack_top+.15), LOAD_COLOR,
           count if total_force is None else total_force)
     return arrow_top
@@ -984,7 +997,7 @@ def force_arrow_pair(fig, center, direction, tension, length, name):
     """인장은 바깥쪽, 압축은 중심 쪽을 향하는 두 화살표로 표시합니다."""
     center, direction = np.asarray(center), np.asarray(direction)
     for side in (-1, 1):
-        inner = center + side * length * .18 * direction
+        inner = center + side * length * .24 * direction
         outer = center + side * length * .5 * direction
         start, end = (inner, outer) if tension else (outer, inner)
         fig.add_annotation(
@@ -1002,10 +1015,10 @@ def add_member_force_arrows(fig, model, result, shown, scale, within, amplify):
     # (부재 역할, 경간 내 위치, 글상자의 가로·세로 간격, 축력 부호 필터)
     specs = {
         "단순교": [("바닥 보", .5, -45, -65, 0)],
-        "아치교": [("바닥 보", .6, 35, -65, 0), ("아치", .3, -55, 55, 0),
+        "아치교": [("바닥 보", .2, 35, -65, 0), ("아치", .3, -55, 55, 0),
                   ("세로 지지대", .75, 55, 35, 0)],
-        "트러스교": [("바닥 보", .5, 0, -65, 0), (None, .7, 50, 60, 1),
-                    (None, .3, -50, 35, -1)],
+        "트러스교": [("바닥 보", .2, 0, -55, 0), ("아래 가로 막대", .3, 0, 50, 0),
+                    ("세로 막대", 1., 18, 50, 0)],
         "사장교": [("바닥 보", .5, 0, 65, 0), ("사장 케이블", .3, -35, -55, 0),
                   ("주탑", 0., -55, 25, 0)],
         "현수교": [("바닥 보", .5, 0, 65, 0), ("주케이블", .4, -25, -65, 0),
@@ -1032,10 +1045,13 @@ def add_member_force_arrows(fig, model, result, shown, scale, within, amplify):
         member_name = {"바닥 보": "상판 아래 보", "수직 매다는 줄": "행어(세로줄)"}.get(e["role"], e["role"])
         text = member_name + (" · 휨" if moment > 1e-9 else "")
         text_anchor = "center"
-        if e["role"] == "바닥 보" and offset_y < 0:
+        if model["kind"] == "트러스교":
+            # 중앙 하중을 피하고, 끝 세로 막대와 아래 가로 막대를 따로 가리킵니다.
+            text_anchor = "right" if offset_y < 0 or e["role"] == "세로 막대" else "center"
+        elif e["role"] == "바닥 보" and offset_y < 0:
             # 중앙에 쌓인 추를 가리지 않도록 위쪽 보 설명은 왼쪽에 둡니다.
             text = member_name + ("<br>휨" if moment > 1e-9 else "")
-            offset_x = -24 if fraction <= .5 else -44
+            offset_x = 0 if model["kind"] == "아치교" else (-24 if fraction <= .5 else -44)
             text_anchor = "right"
         if abs(axial) <= 1e-7 and moment <= 1e-9:
             text += "<br>힘 거의 없음"
@@ -1051,9 +1067,9 @@ def add_member_force_arrows(fig, model, result, shown, scale, within, amplify):
         direction = direction / member_length
         perpendicular = np.array([-direction[1], direction[0]])
         if abs(axial) > 1e-7:
-            offset = deck_half_depth(model["kind"]) / 2 if e["role"] == "바닥 보" else .4
+            offset = deck_half_depth(model["kind"]) / 2 if e["role"] == "바닥 보" else .15
             force_arrow_pair(fig, np.array([x, y]) + offset * perpendicular, direction,
-                             axial > 0, min(2.2, max(1.8, member_length * .8)), f"member_axial_{index}")
+                             axial > 0, min(1.8, member_length * .72), f"member_axial_{index}")
         if model["kind"] == "단순교" and moment > 1e-9:
             force_arrow_pair(fig, [x, y + BEAM_HALF_DEPTH / 2], [1., 0.], False, 1.8, f"member_bending_{index}_upper")
             force_arrow_pair(fig, [x, y - BEAM_HALF_DEPTH / 2], [1., 0.], True, 1.8, f"member_bending_{index}_lower")
@@ -1159,9 +1175,23 @@ def structure_figure(sweep, count, amplify, title=None, show_forces=False):
         load_x = (center[0] + amplify*center[1])*scale
         load_y = center[2]*amplify*scale + depth
     live_force = count*model["weight_mass"]*GRAVITY
+    visible_limit = MAX_VISIBLE_WEIGHTS
+    if kind == "현수교":
+        # 중앙 주케이블 아래의 실제 그림 공간에 맞춰 추 아이콘 수만 줄입니다.
+        cable_ys = []
+        for e in model["members"]:
+            if e["role"] == "주케이블":
+                points = member_display_points(model, e, shown)
+                if points[0, 0] <= load_x <= points[1, 0]:
+                    cable_ys.append(float(np.interp(load_x, points[:, 0], points[:, 1])))
+        if cable_ys:
+            space = min(cable_ys) - load_y - .25 - WEIGHT_BODY_HEIGHT - WEIGHT_RING_HEIGHT
+            visible_limit = max(1, min(MAX_VISIBLE_WEIGHTS, 1 + math.floor(space / WEIGHT_STACK_STEP)))
     load_top = draw_weights(fig, count, lambda x: load_y, weight_positions(count, load_x, load_x),
-                            arrow_size=1.2+min(live_force, 5)*.2, block_width=.55, total_force=live_force)
-    fig.layout.meta.update(load_x=load_x, load_y=load_y, load_top=load_top)
+                            arrow_size=1.2+min(live_force, 5)*.2, block_width=.72,
+                            total_force=live_force, max_visible=visible_limit)
+    fig.layout.meta.update(load_x=load_x, load_y=load_y, load_top=load_top,
+                           visible_weight_count=min(count, visible_limit))
     status_y = max(9., load_top+1.2) if load_top is not None else 9.
     fig.update_yaxes(range=[model["view_y"][0], max(model["view_y"][1], status_y+1.3)])
     if show_forces:
@@ -1196,16 +1226,27 @@ def experiment_figure(sweep, count, amplify, zoom):
         bottom, top = min(ys) - 1.5, max(max(ys) + 1.25, deck_top + 3.5)
     if fig.layout.meta["load_top"] is not None:
         top = max(top, fig.layout.meta["load_top"] + .8)
+    if sweep["model"]["kind"] == "트러스교":
+        bottom = min(ys) - 3.0  # 아래 가로 막대 설명과 경간 안내 사이의 여백
     center_y = (bottom + top) / 2
     half_y = max(7., top - bottom) / (2 * zoom)
     # 짧은 교량은 화면을 더 넓게 사용하고, 케이블교는 뒤쪽 앵커까지 보입니다.
     half_x = (11.2 if sweep["model"]["kind"] in ("사장교", "현수교") else 8.) / zoom
-    fig.update_layout(height=440, dragmode="pan", margin=dict(l=18, r=18, t=105, b=38),
+    fig.update_layout(height=500 if sweep["model"]["kind"] == "트러스교" else 440,
+                      dragmode="pan", margin=dict(l=18, r=18, t=105, b=38),
                       title=dict(y=.98, yanchor="top"))
     fig.update_xaxes(range=[6 - half_x, 6 + half_x], fixedrange=False)
     fig.update_yaxes(range=[center_y - half_y, center_y + half_y], fixedrange=False)
+    if sweep["model"]["kind"] == "트러스교":
+        for annotation in fig.layout.annotations:
+            if (annotation.name or "").startswith("member_name_"):
+                if zoom > 1 and annotation.text.startswith("상판 아래 보"):
+                    annotation.text = annotation.text.replace(" · 휨", "<br>휨")
+                if zoom < 1 and annotation.text.startswith("세로 막대"):
+                    annotation.ay += round((1-zoom)*100)
     # 상태와 경간 안내는 카메라 확대에도 화면 가장자리에 남겨 둡니다.
-    fig.layout.annotations[-2].update(x=.5, y=1.02, xref="paper", yref="paper", yanchor="bottom")
+    fig.layout.annotations[-2].update(x=.5, y=1.02, xref="paper", yref="paper", yanchor="bottom",
+                                      font=dict(size=13, color="#243447"))
     if not fig.layout.meta["frozen"]:
         fig.layout.annotations[-2].update(text=f"변형 {amplify}배 확대")
     fig.layout.annotations[-1].update(x=.5, y=-.02, xref="paper", yref="paper", yanchor="top")
@@ -1220,7 +1261,8 @@ def change_bridge_zoom(step):
 def overview_figure(sweeps, amplify):
     titles = [f"{k} · {capacity_text(sweeps[k])}" for k in BRIDGE_NAMES]
     fig = make_subplots(rows=3, cols=2, specs=[[{}, {}], [{"colspan": 2}, None], [{}, {}]],
-                        subplot_titles=titles, vertical_spacing=.08, horizontal_spacing=.05)
+                        subplot_titles=titles, vertical_spacing=.12, horizontal_spacing=.08,
+                        row_heights=[.3, .4, .3])
     positions = [(1, 1), (1, 2), (2, 1), (3, 1), (3, 2)]
     for idx, (kind, (row, col)) in enumerate(zip(BRIDGE_NAMES, positions), 1):
         sweep = sweeps[kind]
@@ -1233,17 +1275,31 @@ def overview_figure(sweeps, amplify):
         for picture in source.layout.images or []:
             fig.add_layout_image(picture.to_plotly_json(), row=row, col=col)
         xref, yref = ("x" if idx == 1 else f"x{idx}"), ("y" if idx == 1 else f"y{idx}")
-        for ann in source.layout.annotations or []:
+        for ann in source.layout.annotations[:-2]:
             data = ann.to_plotly_json()
             data.update(xref=xref, yref=yref)
             if data.get("showarrow"):
                 data.update(axref=xref, ayref=yref)
             fig.add_annotation(data)
-        fig.update_xaxes(range=[-5.2, 17.2], showgrid=False, showticklabels=False, zeroline=False, row=row, col=col)
-        fig.update_yaxes(range=source.layout.yaxis.range, showgrid=False, showticklabels=False, zeroline=False,
+        # 안내 문구를 좌표 범위에서 분리해 구조 자체가 충분히 크게 보이게 합니다.
+        state = source.layout.annotations[-2].text if source.layout.meta["frozen"] else f"변형 {amplify}배 확대"
+        fig.add_annotation(x=.5, y=.98, xref=f"{xref} domain", yref=f"{yref} domain",
+                           text=state, showarrow=False, yanchor="top", font=dict(size=13, color="#243447"))
+        fig.add_annotation(x=.5, y=.02, xref=f"{xref} domain", yref=f"{yref} domain",
+                           text=source.layout.annotations[-1].text, showarrow=False,
+                           yanchor="bottom", font=dict(size=13, color="#243447"))
+        ys = [float(y) for trace in source.data for y in trace.y if y is not None]
+        bottom, top = min(ys)-1.5, max(ys)+1.5
+        if source.layout.meta["load_top"] is not None:
+            top = max(top, source.layout.meta["load_top"]+1.5)
+        half_x = 11.2 if kind in ("사장교", "현수교") else 8.
+        fig.update_xaxes(range=[6-half_x, 6+half_x], showgrid=False, showticklabels=False, zeroline=False, row=row, col=col)
+        fig.update_yaxes(range=[bottom, top], showgrid=False, showticklabels=False, zeroline=False,
                          scaleanchor=xref, scaleratio=1, row=row, col=col)
-    fig.update_layout(height=1160, showlegend=False, margin=dict(l=10, r=10, t=35, b=10),
+    fig.update_layout(height=1240, showlegend=False, margin=dict(l=16, r=16, t=45, b=16),
+                      font=dict(family="sans-serif", size=14, color="#243447"),
                       paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
+    fig.update_annotations(font=dict(color="#243447"))
     return fig
 
 
@@ -1331,9 +1387,11 @@ def show_result(sweep, count, amplify, key, figure_slot=None, previous_count=Non
 
 
 def load_curve(sweeps, names, count, include_reference=False):
-    fig = data_figure("추 개수에 따른 처짐", "추 개수", "최대 처짐 (mm)", 440)
-    fig.update_layout(margin=dict(t=60, b=125),
-                      legend=dict(orientation="h", y=-.3, x=0, yanchor="top", entrywidth=90))
+    fig = data_figure("추 개수에 따른 처짐", "추 개수 (개)", "최대 처짐 (mm)", 500)
+    fig.update_layout(margin=dict(l=65, r=25, t=65, b=150),
+                      font=dict(color="#243447"),
+                      legend=dict(orientation="h", y=-.32, x=0, yanchor="top", entrywidth=100,
+                                  font=dict(size=14, color="#243447")))
     for kind in names:
         sweep = sweeps[kind]
         for within in [True, False]:
@@ -1354,8 +1412,11 @@ def load_curve(sweeps, names, count, include_reference=False):
             fig.add_trace(go.Scatter(x=xs, y=ys, mode="lines", name=kind if within else f"{kind} · 기준 초과 참고",
                                      legendgroup=kind, showlegend=within,
                                      line=dict(color=COLORS[kind], width=3, dash="solid" if within else "dot")))
-    fig.add_vline(x=count, line_color=SUPPORT_COLOR, line_dash="dash", annotation_text=f"현재 {count}개")
-    fig.update_xaxes(dtick=2)
+    fig.add_vline(x=count, line_color=SUPPORT_COLOR, line_dash="dash", annotation_text=f"현재 {count}개",
+                  annotation_xanchor="right" if count >= 18 else "left")
+    fig.update_xaxes(range=[-.5, 20.5], nticks=6, tickformat="d", tickangle=0,
+                     tickfont=dict(size=14, color="#243447"), title_font=dict(size=14, color="#243447"))
+    fig.update_yaxes(tickfont=dict(size=14, color="#243447"), title_font=dict(size=14, color="#243447"))
     return fig
 
 
@@ -1606,8 +1667,10 @@ with comparison_tab:
                                       key="advanced_comparison", on_change="rerun")
     if advanced_comparison.open:
         with advanced_comparison:
-            chart(overview_figure(sweeps, amplify), "capacity_bridge_overview")
-            st.caption("이 그림만 각 교량의 마지막 기준 이내 추 개수를 사용합니다. 주탑 하부는 하중 전달을 설명하는 개념 표시입니다.")
+            with st.container(key="bridge_overview_scroll"):
+                with st.container(key="bridge_overview"):
+                    chart(overview_figure(sweeps, amplify), "capacity_bridge_overview")
+            st.caption("이 그림만 각 교량의 마지막 기준 이내 추 개수를 사용합니다. 주탑 하부는 하중 전달을 설명하는 개념 표시입니다. 좁은 화면에서는 그림 영역을 좌우로 이동할 수 있습니다.")
             details = []
             for kind in names:
                 m, r = sweeps[kind]["model"], sweeps[kind]["results"][load]
