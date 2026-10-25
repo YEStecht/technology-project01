@@ -365,8 +365,16 @@ def build_model(kind, cfg, braced=True):
         for i in range(n):
             member(bottom[i], bottom[i+1], role="아래 가로 막대")
             if braced:
-                a, b = (bottom[i], deck[i+1]) if i % 2 == 0 else (deck[i], bottom[i+1])
-                member(a, b, role="대각선 보강재")
+                # 중앙 세로축을 기준으로 왼쪽의 지그재그 배치를 오른쪽에 반사합니다.
+                # 홀수 칸의 중앙에는 두 대각재를 둡니다. X 교차점은 연결하지 않습니다.
+                mirror = n-1-i
+                rising = min(i, mirror) % 2 == 0
+                if i > mirror:
+                    rising = not rising
+                directions = (True, False) if i == mirror else (rising,)
+                for upward in directions:
+                    a, b = (bottom[i], deck[i+1]) if upward else (deck[i], bottom[i+1])
+                    member(a, b, role="대각선 보강재")
         for a, d in zip(bottom, deck):
             member(a, d, role="세로 막대")
         pin(bottom[0])
@@ -582,7 +590,7 @@ def recover(model, cfg, pieces, u, force, K, active, count):
 
 @st.cache_data(show_spinner=False, max_entries=100)
 def solve_sweep(kind, cfg, braced=True):
-    """중앙 집중 하중으로 추 0~20개를 계산. 케이블의 압축은 허용하지 않습니다.
+    """좌우 대칭 트러스 등 각 모형에 중앙 추 0~20개를 계산. 케이블의 압축은 허용하지 않습니다.
 
     일단 모든 줄을 넣어 풀고, 눌리는 줄은 제거합니다. 제거한 줄이 다시
     늘어나면 재포함합니다. 수렴/안정성 검사를 통과하지 않으면 수치를 숨깁니다.
@@ -892,6 +900,7 @@ def bridge_chapter_intro(kind):
             principle.markdown(triangular_truss_diagram(), unsafe_allow_html=True)
             principle.caption("꼭대기를 누르면 기울어진 두 막대는 압축, 아랫막대는 인장을 받아요. 아랫막대는 양쪽이 벌어지려는 것을 잡아 줍니다.")
             principle.caption("막대를 핀으로 연결한 개념 그림입니다. 화살표는 막대에 작용하는 힘의 방향이며, 아래 하중 실험의 계산 결과와는 별개입니다.")
+            principle.caption("하중 실험의 대각재는 중앙 세로축을 기준으로 좌우 대칭입니다. 홀수 칸의 중앙은 X자로 보강하며, X 교차점은 연결하지 않습니다.")
         load_path.markdown(
             f'<p>{learning_icon("arrow")} <strong>하중이 전달되는 과정</strong></p>'
             + bridge_anatomy_diagram(kind) + load_path_diagram(guide["load_path"], kind)

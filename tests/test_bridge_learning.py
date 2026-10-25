@@ -80,6 +80,37 @@ class BridgeLearningTests(unittest.TestCase):
                                   + sum(result["reactions"][2::3]))
                         self.assertAlmostEqual(moment, total*config["span"]/2, places=7)
 
+    def test_truss_mirrored_members_have_equal_axial_forces(self):
+        # 기하학적 반사와 대칭 하중의 부재력 일치를 함께 검사합니다.
+        np = self.calc["np"]
+        for panels in range(1, 12):
+            for self_weight in (False, True):
+                with self.subTest(panels=panels, self_weight=self_weight):
+                    cfg = dict(self.config(), panels=panels, self_weight=self_weight)
+                    sweep = self.calc["solve_sweep"]("트러스교", cfg)
+                    model = sweep["model"]
+
+                    def key(member, reflected=False):
+                        points = model["nodes"][[member["i"], member["j"]]].copy()
+                        if reflected:
+                            points[:, 0] = model["span"] - points[:, 0]
+                        return (member["role"], tuple(sorted(tuple(p) for p in np.round(points, 10))))
+
+                    indices = {key(e): i for i, e in enumerate(model["members"])}
+                    for count in (1, 20):
+                        result = sweep["results"][count]
+                        self.assertTrue(result["stable"])
+                        for i, member in enumerate(model["members"]):
+                            reflected = indices[key(member, reflected=True)]
+                            self.assertAlmostEqual(result["axial"][i], result["axial"][reflected], places=8)
+                        supports = [d for d in model["fixed"] if d % 3 == 1]
+                        self.assertEqual(len(supports), 2)
+                        np.testing.assert_allclose(result["reactions"][supports], result["total_force"]/2, atol=1e-9)
+                    diagonal_count = sum(e["role"] == "대각선 보강재" for e in model["members"])
+                    self.assertEqual(diagonal_count, panels + panels % 2)
+                    unbraced = self.calc["build_model"]("트러스교", cfg, braced=False)
+                    self.assertFalse(any(e["role"] == "대각선 보강재" for e in unbraced["members"]))
+
     def test_simple_beam_matches_midspan_point_load_solution(self):
         # MIT Beam Displacements: 중앙 처짐 PL³/(48EI), 최대 휨 모멘트 PL/4.
         # 자중이 있을 때 기존 균등하중 해를 더해 전체 처짐 곡선까지 확인합니다.
